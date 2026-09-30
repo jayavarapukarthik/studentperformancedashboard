@@ -17,7 +17,7 @@ from reportlab.platypus import (
     Spacer,
     Table,
     TableStyle,
-    PageBreak
+    KeepTogether
 )
 # ============================================================
 # PAGE CONFIGURATION
@@ -1695,9 +1695,9 @@ def build_parent_report_pdf(
 
         leftMargin=12 * mm,
 
-        topMargin=12 * mm,
+        topMargin=9 * mm,
 
-        bottomMargin=14 * mm,
+        bottomMargin=10 * mm,
 
         title=(
             f"Parent Academic Report - "
@@ -1790,9 +1790,9 @@ def build_parent_report_pdf(
             "#123b68"
         ),
 
-        spaceBefore=8,
+        spaceBefore=5,
 
-        spaceAfter=6
+        spaceAfter=4
     )
 
     body_style = ParagraphStyle(
@@ -1803,9 +1803,9 @@ def build_parent_report_pdf(
 
         fontName="Helvetica",
 
-        fontSize=8.5,
+        fontSize=8,
 
-        leading=11,
+        leading=10,
 
         textColor=colors.HexColor(
             "#334155"
@@ -1818,9 +1818,9 @@ def build_parent_report_pdf(
 
         parent=body_style,
 
-        fontSize=7.5,
+        fontSize=7,
 
-        leading=9.5
+        leading=8.5
     )
 
     small_bold_style = ParagraphStyle(
@@ -2578,10 +2578,6 @@ def build_parent_report_pdf(
     # ========================================================
 
     story.append(
-        PageBreak()
-    )
-
-    story.append(
 
         Paragraph(
 
@@ -2899,13 +2895,14 @@ def build_parent_report_pdf(
             )
 
             story.append(
-                semester_table
-            )
-
-            story.append(
-                Spacer(
-                    1,
-                    3 * mm
+                KeepTogether(
+                    [
+                        semester_table,
+                        Spacer(
+                            1,
+                            3 * mm
+                        )
+                    ]
                 )
             )
 
