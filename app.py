@@ -2257,7 +2257,7 @@ def build_parent_report_pdf(
 
                 _pdf_paragraph(
                     value,
-                    small_bold_style
+                    table_header_style
                 )
 
                 for value
@@ -2400,22 +2400,22 @@ def build_parent_report_pdf(
 
             _pdf_paragraph(
                 "S.No",
-                small_bold_style
+                table_header_style
             ),
 
             _pdf_paragraph(
                 "Course Code",
-                small_bold_style
+                table_header_style
             ),
 
             _pdf_paragraph(
                 "Course Title",
-                small_bold_style
+                table_header_style
             ),
 
             _pdf_paragraph(
                 "In-Sem Marks / 50",
-                small_bold_style
+                table_header_style
             )
 
         ]]
