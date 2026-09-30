@@ -1832,6 +1832,20 @@ def build_parent_report_pdf(
         fontName="Helvetica-Bold"
     )
 
+    # White text style for dark-blue table headers.
+    # Paragraph text color overrides the TableStyle TEXTCOLOR,
+    # so a dedicated white style is required.
+    table_header_style = ParagraphStyle(
+
+        "TableHeader",
+
+        parent=small_bold_style,
+
+        textColor=colors.white,
+
+        alignment=TA_CENTER
+    )
+
     story = []
 
     # ========================================================
@@ -2718,27 +2732,27 @@ def build_parent_report_pdf(
 
                 _pdf_paragraph(
                     "S.No",
-                    small_bold_style
+                    table_header_style
                 ),
 
                 _pdf_paragraph(
                     "Course Code",
-                    small_bold_style
+                    table_header_style
                 ),
 
                 _pdf_paragraph(
                     "Course Name",
-                    small_bold_style
+                    table_header_style
                 ),
 
                 _pdf_paragraph(
                     "Grade",
-                    small_bold_style
+                    table_header_style
                 ),
 
                 _pdf_paragraph(
                     "Category",
-                    small_bold_style
+                    table_header_style
                 )
 
             ]]
