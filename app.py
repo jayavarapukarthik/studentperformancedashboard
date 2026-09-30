@@ -1579,6 +1579,1503 @@ def load_cgpa_data():
         )
     )
 
+# ============================================================
+# PARENT PDF REPORT GENERATOR
+# ============================================================
+
+def _pdf_text(value):
+
+    if value is None:
+        return "-"
+
+    try:
+        if pd.isna(value):
+            return "-"
+    except Exception:
+        pass
+
+    return str(value).strip()
+
+
+def _pdf_paragraph(value, style):
+
+    safe_text = html.escape(
+        _pdf_text(value)
+    )
+
+    return Paragraph(
+        safe_text,
+        style
+    )
+
+
+def build_parent_report_pdf(
+    student_id,
+    student_name,
+    counsellor_name,
+    emp_id,
+    regulation,
+    cgpa_value,
+    student_data,
+    result_data,
+    total_courses,
+    passed_courses,
+    backlog_courses,
+    category_counts,
+    ordered_categories
+):
+
+    """
+    Generate complete Parent Academic Report PDF.
+    """
+
+    buffer = BytesIO()
+
+    # ========================================================
+    # PDF DOCUMENT
+    # ========================================================
+
+    doc = SimpleDocTemplate(
+
+        buffer,
+
+        pagesize=A4,
+
+        rightMargin=12 * mm,
+
+        leftMargin=12 * mm,
+
+        topMargin=12 * mm,
+
+        bottomMargin=14 * mm,
+
+        title=(
+            f"Parent Academic Report - "
+            f"{student_id}"
+        ),
+
+        author=(
+            "Department of CSE-4, KLEF"
+        )
+    )
+
+    styles = getSampleStyleSheet()
+
+    # ========================================================
+    # PDF STYLES
+    # ========================================================
+
+    title_style = ParagraphStyle(
+
+        "KlefTitle",
+
+        parent=styles["Title"],
+
+        fontName="Helvetica-Bold",
+
+        fontSize=16,
+
+        leading=20,
+
+        textColor=colors.HexColor(
+            "#123b68"
+        ),
+
+        alignment=TA_CENTER,
+
+        spaceAfter=3
+    )
+
+    dept_style = ParagraphStyle(
+
+        "Dept",
+
+        parent=styles["Normal"],
+
+        fontName="Helvetica-Bold",
+
+        fontSize=10,
+
+        leading=13,
+
+        textColor=colors.HexColor(
+            "#475569"
+        ),
+
+        alignment=TA_CENTER,
+
+        spaceAfter=4
+    )
+
+    portal_style = ParagraphStyle(
+
+        "Portal",
+
+        parent=styles["Normal"],
+
+        fontName="Helvetica-Bold",
+
+        fontSize=11,
+
+        leading=14,
+
+        textColor=colors.white,
+
+        alignment=TA_CENTER
+    )
+
+    section_style = ParagraphStyle(
+
+        "Section",
+
+        parent=styles["Heading2"],
+
+        fontName="Helvetica-Bold",
+
+        fontSize=11,
+
+        leading=14,
+
+        textColor=colors.HexColor(
+            "#123b68"
+        ),
+
+        spaceBefore=8,
+
+        spaceAfter=6
+    )
+
+    body_style = ParagraphStyle(
+
+        "Body",
+
+        parent=styles["Normal"],
+
+        fontName="Helvetica",
+
+        fontSize=8.5,
+
+        leading=11,
+
+        textColor=colors.HexColor(
+            "#334155"
+        )
+    )
+
+    small_style = ParagraphStyle(
+
+        "Small",
+
+        parent=body_style,
+
+        fontSize=7.5,
+
+        leading=9.5
+    )
+
+    small_bold_style = ParagraphStyle(
+
+        "SmallBold",
+
+        parent=small_style,
+
+        fontName="Helvetica-Bold"
+    )
+
+    story = []
+
+    # ========================================================
+    # KLEF HEADER
+    # ========================================================
+
+    story.append(
+
+        Paragraph(
+
+            "KONERU LAKSHMAIAH EDUCATION FOUNDATION",
+
+            title_style
+
+        )
+
+    )
+
+    story.append(
+
+        Paragraph(
+
+            "DEPARTMENT OF CSE-4",
+
+            dept_style
+
+        )
+
+    )
+
+    portal_table = Table(
+
+        [[
+
+            Paragraph(
+
+                "STUDENT ACADEMIC PERFORMANCE PORTAL",
+
+                portal_style
+
+            )
+
+        ]],
+
+        colWidths=[
+            186 * mm
+        ]
+
+    )
+
+    portal_table.setStyle(
+
+        TableStyle([
+
+            (
+                "BACKGROUND",
+                (0, 0),
+                (-1, -1),
+                colors.HexColor(
+                    "#123b68"
+                )
+            ),
+
+            (
+                "BOX",
+                (0, 0),
+                (-1, -1),
+                0.5,
+                colors.HexColor(
+                    "#123b68"
+                )
+            ),
+
+            (
+                "LEFTPADDING",
+                (0, 0),
+                (-1, -1),
+                8
+            ),
+
+            (
+                "RIGHTPADDING",
+                (0, 0),
+                (-1, -1),
+                8
+            ),
+
+            (
+                "TOPPADDING",
+                (0, 0),
+                (-1, -1),
+                7
+            ),
+
+            (
+                "BOTTOMPADDING",
+                (0, 0),
+                (-1, -1),
+                7
+            )
+
+        ])
+
+    )
+
+    story.append(
+        portal_table
+    )
+
+    story.append(
+        Spacer(
+            1,
+            2 * mm
+        )
+    )
+
+    story.append(
+
+        Paragraph(
+
+            "Academic Excellence • "
+            "Performance Monitoring • "
+            "Student Success",
+
+            ParagraphStyle(
+
+                "Tagline",
+
+                parent=body_style,
+
+                alignment=TA_CENTER,
+
+                fontSize=7.5,
+
+                textColor=colors.HexColor(
+                    "#64748b"
+                )
+
+            )
+
+        )
+
+    )
+
+    story.append(
+        Spacer(
+            1,
+            6 * mm
+        )
+    )
+
+    # ========================================================
+    # STUDENT DETAILS
+    # ========================================================
+
+    story.append(
+
+        Paragraph(
+
+            "STUDENT DETAILS",
+
+            section_style
+
+        )
+
+    )
+
+    detail_data = [
+
+        [
+
+            _pdf_paragraph(
+                "Student ID",
+                small_bold_style
+            ),
+
+            _pdf_paragraph(
+                student_id,
+                body_style
+            ),
+
+            _pdf_paragraph(
+                "Student Name",
+                small_bold_style
+            ),
+
+            _pdf_paragraph(
+                student_name,
+                body_style
+            )
+
+        ],
+
+        [
+
+            _pdf_paragraph(
+                "Counsellor",
+                small_bold_style
+            ),
+
+            _pdf_paragraph(
+                counsellor_name,
+                body_style
+            ),
+
+            _pdf_paragraph(
+                "Emp ID",
+                small_bold_style
+            ),
+
+            _pdf_paragraph(
+                emp_id,
+                body_style
+            )
+
+        ],
+
+        [
+
+            _pdf_paragraph(
+                "Regulation",
+                small_bold_style
+            ),
+
+            _pdf_paragraph(
+                regulation,
+                body_style
+            ),
+
+            _pdf_paragraph(
+                "CGPA",
+                small_bold_style
+            ),
+
+            _pdf_paragraph(
+                cgpa_value,
+                body_style
+            )
+
+        ]
+
+    ]
+
+    detail_table = Table(
+
+        detail_data,
+
+        colWidths=[
+
+            28 * mm,
+            63 * mm,
+            28 * mm,
+            67 * mm
+
+        ]
+
+    )
+
+    detail_table.setStyle(
+
+        TableStyle([
+
+            (
+                "BACKGROUND",
+                (0, 0),
+                (0, -1),
+                colors.HexColor(
+                    "#eef4f9"
+                )
+            ),
+
+            (
+                "BACKGROUND",
+                (2, 0),
+                (2, -1),
+                colors.HexColor(
+                    "#eef4f9"
+                )
+            ),
+
+            (
+                "BOX",
+                (0, 0),
+                (-1, -1),
+                0.5,
+                colors.HexColor(
+                    "#cbd5e1"
+                )
+            ),
+
+            (
+                "INNERGRID",
+                (0, 0),
+                (-1, -1),
+                0.35,
+                colors.HexColor(
+                    "#dbe5ef"
+                )
+            ),
+
+            (
+                "VALIGN",
+                (0, 0),
+                (-1, -1),
+                "MIDDLE"
+            ),
+
+            (
+                "LEFTPADDING",
+                (0, 0),
+                (-1, -1),
+                6
+            ),
+
+            (
+                "RIGHTPADDING",
+                (0, 0),
+                (-1, -1),
+                6
+            ),
+
+            (
+                "TOPPADDING",
+                (0, 0),
+                (-1, -1),
+                5
+            ),
+
+            (
+                "BOTTOMPADDING",
+                (0, 0),
+                (-1, -1),
+                5
+            )
+
+        ])
+
+    )
+
+    story.append(
+        detail_table
+    )
+
+    # ========================================================
+    # ACADEMIC PERFORMANCE HIGHLIGHTS
+    # ========================================================
+
+    story.append(
+
+        Paragraph(
+
+            "ACADEMIC PERFORMANCE HIGHLIGHTS",
+
+            section_style
+
+        )
+
+    )
+
+    highlight_headers = [
+
+        "Total Courses",
+        "Passed",
+        "Backlogs"
+
+    ] + [
+
+        _pdf_text(category)
+
+        for category
+        in ordered_categories
+
+    ]
+
+    highlight_values = [
+
+        str(total_courses),
+        str(passed_courses),
+        str(backlog_courses)
+
+    ] + [
+
+        str(
+            category_counts.get(
+                category,
+                0
+            )
+        )
+
+        for category
+        in ordered_categories
+
+    ]
+
+    highlight_count = len(
+        highlight_headers
+    )
+
+    highlight_width = (
+        186 * mm
+        / highlight_count
+    )
+
+    highlight_table = Table(
+
+        [
+
+            [
+
+                _pdf_paragraph(
+                    value,
+                    small_bold_style
+                )
+
+                for value
+                in highlight_headers
+
+            ],
+
+            [
+
+                _pdf_paragraph(
+                    value,
+                    body_style
+                )
+
+                for value
+                in highlight_values
+
+            ]
+
+        ],
+
+        colWidths=[
+            highlight_width
+        ] * highlight_count
+
+    )
+
+    highlight_table.setStyle(
+
+        TableStyle([
+
+            (
+                "BACKGROUND",
+                (0, 0),
+                (-1, 0),
+                colors.HexColor(
+                    "#123b68"
+                )
+            ),
+
+            (
+                "TEXTCOLOR",
+                (0, 0),
+                (-1, 0),
+                colors.white
+            ),
+
+            (
+                "GRID",
+                (0, 0),
+                (-1, -1),
+                0.35,
+                colors.HexColor(
+                    "#dbe5ef"
+                )
+            ),
+
+            (
+                "ALIGN",
+                (0, 0),
+                (-1, -1),
+                "CENTER"
+            ),
+
+            (
+                "VALIGN",
+                (0, 0),
+                (-1, -1),
+                "MIDDLE"
+            ),
+
+            (
+                "TOPPADDING",
+                (0, 0),
+                (-1, -1),
+                5
+            ),
+
+            (
+                "BOTTOMPADDING",
+                (0, 0),
+                (-1, -1),
+                5
+            )
+
+        ])
+
+    )
+
+    story.append(
+        highlight_table
+    )
+
+    # ========================================================
+    # IN-SEMESTER PERFORMANCE
+    # ========================================================
+
+    if (
+
+        isinstance(
+            student_data,
+            pd.DataFrame
+        )
+
+        and
+
+        not student_data.empty
+
+        and
+
+        all(
+
+            column in student_data.columns
+
+            for column in [
+
+                "Course Code",
+                "Course Name",
+                "Total"
+
+            ]
+
+        )
+
+    ):
+
+        story.append(
+
+            Paragraph(
+
+                "IN-SEMESTER PERFORMANCE",
+
+                section_style
+
+            )
+
+        )
+
+        insem_rows = [[
+
+            _pdf_paragraph(
+                "S.No",
+                small_bold_style
+            ),
+
+            _pdf_paragraph(
+                "Course Code",
+                small_bold_style
+            ),
+
+            _pdf_paragraph(
+                "Course Title",
+                small_bold_style
+            ),
+
+            _pdf_paragraph(
+                "In-Sem Marks / 50",
+                small_bold_style
+            )
+
+        ]]
+
+        for index, (_, row) in enumerate(
+
+            student_data.iterrows(),
+
+            start=1
+
+        ):
+
+            total = row["Total"]
+
+            if pd.isna(total):
+
+                marks_text = "-"
+
+            else:
+
+                try:
+
+                    marks = float(total)
+
+                    if marks.is_integer():
+
+                        marks_text = (
+                            f"{int(marks)} / 50"
+                        )
+
+                    else:
+
+                        marks_text = (
+                            f"{marks:g} / 50"
+                        )
+
+                except Exception:
+
+                    marks_text = (
+                        f"{_pdf_text(total)} / 50"
+                    )
+
+            insem_rows.append([
+
+                _pdf_paragraph(
+                    index,
+                    small_style
+                ),
+
+                _pdf_paragraph(
+                    row["Course Code"],
+                    small_style
+                ),
+
+                _pdf_paragraph(
+                    row["Course Name"],
+                    small_style
+                ),
+
+                _pdf_paragraph(
+                    marks_text,
+                    small_style
+                )
+
+            ])
+
+        insem_table = Table(
+
+            insem_rows,
+
+            colWidths=[
+
+                14 * mm,
+                34 * mm,
+                98 * mm,
+                40 * mm
+
+            ],
+
+            repeatRows=1
+
+        )
+
+        insem_table.setStyle(
+
+            TableStyle([
+
+                (
+                    "BACKGROUND",
+                    (0, 0),
+                    (-1, 0),
+                    colors.HexColor(
+                        "#123b68"
+                    )
+                ),
+
+                (
+                    "TEXTCOLOR",
+                    (0, 0),
+                    (-1, 0),
+                    colors.white
+                ),
+
+                (
+                    "GRID",
+                    (0, 0),
+                    (-1, -1),
+                    0.35,
+                    colors.HexColor(
+                        "#dbe5ef"
+                    )
+                ),
+
+                (
+                    "ROWBACKGROUNDS",
+                    (0, 1),
+                    (-1, -1),
+                    [
+
+                        colors.white,
+
+                        colors.HexColor(
+                            "#f8fafc"
+                        )
+
+                    ]
+                ),
+
+                (
+                    "ALIGN",
+                    (0, 0),
+                    (0, -1),
+                    "CENTER"
+                ),
+
+                (
+                    "ALIGN",
+                    (3, 1),
+                    (3, -1),
+                    "CENTER"
+                ),
+
+                (
+                    "VALIGN",
+                    (0, 0),
+                    (-1, -1),
+                    "MIDDLE"
+                ),
+
+                (
+                    "TOPPADDING",
+                    (0, 0),
+                    (-1, -1),
+                    4
+                ),
+
+                (
+                    "BOTTOMPADDING",
+                    (0, 0),
+                    (-1, -1),
+                    4
+                )
+
+            ])
+
+        )
+
+        story.append(
+            insem_table
+        )
+
+    # ========================================================
+    # SEMESTER-WISE PERFORMANCE
+    # ========================================================
+
+    story.append(
+        PageBreak()
+    )
+
+    story.append(
+
+        Paragraph(
+
+            "SEMESTER-WISE ACADEMIC PERFORMANCE",
+
+            section_style
+
+        )
+
+    )
+
+    if (
+
+        isinstance(
+            result_data,
+            pd.DataFrame
+        )
+
+        and
+
+        not result_data.empty
+
+    ):
+
+        pdf_result = (
+            result_data.copy()
+        )
+
+        if (
+            "Semester Number"
+            not in pdf_result.columns
+        ):
+
+            pdf_result[
+                "Semester Number"
+            ] = pdf_result.apply(
+
+                lambda row:
+
+                get_semester_number(
+
+                    regulation,
+
+                    row.get(
+                        "AY",
+                        ""
+                    ),
+
+                    row.get(
+                        "Semester",
+                        ""
+                    )
+
+                ),
+
+                axis=1
+
+            )
+
+        semester_order = [
+
+            "1-1",
+            "1-2",
+            "2-1",
+            "2-2",
+            "3-1",
+            "3-2",
+            "4-1",
+            "4-2"
+
+        ]
+
+        for semester_number in semester_order:
+
+            semester_data = (
+
+                pdf_result[
+
+                    pdf_result[
+                        "Semester Number"
+                    ]
+
+                    == semester_number
+
+                ]
+
+                .copy()
+
+            )
+
+            if semester_data.empty:
+
+                continue
+
+            ay_value = (
+                semester_data.iloc[0].get(
+                    "AY",
+                    "-"
+                )
+            )
+
+            term_value = (
+                semester_data.iloc[0].get(
+                    "Semester",
+                    "-"
+                )
+            )
+
+            story.append(
+
+                Paragraph(
+
+                    f"SEMESTER "
+                    f"{html.escape(_pdf_text(semester_number))}",
+
+                    section_style
+
+                )
+
+            )
+
+            story.append(
+
+                Paragraph(
+
+                    "Academic Year: "
+                    f"{html.escape(_pdf_text(ay_value))}"
+                    "  |  "
+                    f"{html.escape(_pdf_text(term_value))}",
+
+                    small_style
+
+                )
+
+            )
+
+            semester_rows = [[
+
+                _pdf_paragraph(
+                    "S.No",
+                    small_bold_style
+                ),
+
+                _pdf_paragraph(
+                    "Course Code",
+                    small_bold_style
+                ),
+
+                _pdf_paragraph(
+                    "Course Name",
+                    small_bold_style
+                ),
+
+                _pdf_paragraph(
+                    "Grade",
+                    small_bold_style
+                ),
+
+                _pdf_paragraph(
+                    "Category",
+                    small_bold_style
+                )
+
+            ]]
+
+            for index, (_, row) in enumerate(
+
+                semester_data.iterrows(),
+
+                start=1
+
+            ):
+
+                semester_rows.append([
+
+                    _pdf_paragraph(
+                        index,
+                        small_style
+                    ),
+
+                    _pdf_paragraph(
+                        row.get(
+                            "Course Code",
+                            "-"
+                        ),
+                        small_style
+                    ),
+
+                    _pdf_paragraph(
+                        row.get(
+                            "Course Name",
+                            "-"
+                        ),
+                        small_style
+                    ),
+
+                    _pdf_paragraph(
+                        row.get(
+                            "Grade",
+                            "-"
+                        ),
+                        small_style
+                    ),
+
+                    _pdf_paragraph(
+                        row.get(
+                            "Category",
+                            "-"
+                        ),
+                        small_style
+                    )
+
+                ])
+
+            semester_table = Table(
+
+                semester_rows,
+
+                colWidths=[
+
+                    12 * mm,
+                    34 * mm,
+                    93 * mm,
+                    22 * mm,
+                    25 * mm
+
+                ],
+
+                repeatRows=1
+
+            )
+
+            semester_table.setStyle(
+
+                TableStyle([
+
+                    (
+                        "BACKGROUND",
+                        (0, 0),
+                        (-1, 0),
+                        colors.HexColor(
+                            "#123b68"
+                        )
+                    ),
+
+                    (
+                        "TEXTCOLOR",
+                        (0, 0),
+                        (-1, 0),
+                        colors.white
+                    ),
+
+                    (
+                        "GRID",
+                        (0, 0),
+                        (-1, -1),
+                        0.35,
+                        colors.HexColor(
+                            "#dbe5ef"
+                        )
+                    ),
+
+                    (
+                        "ROWBACKGROUNDS",
+                        (0, 1),
+                        (-1, -1),
+                        [
+
+                            colors.white,
+
+                            colors.HexColor(
+                                "#f8fafc"
+                            )
+
+                        ]
+                    ),
+
+                    (
+                        "ALIGN",
+                        (0, 0),
+                        (0, -1),
+                        "CENTER"
+                    ),
+
+                    (
+                        "ALIGN",
+                        (3, 1),
+                        (-1, -1),
+                        "CENTER"
+                    ),
+
+                    (
+                        "VALIGN",
+                        (0, 0),
+                        (-1, -1),
+                        "MIDDLE"
+                    ),
+
+                    (
+                        "TOPPADDING",
+                        (0, 0),
+                        (-1, -1),
+                        3
+                    ),
+
+                    (
+                        "BOTTOMPADDING",
+                        (0, 0),
+                        (-1, -1),
+                        3
+                    )
+
+                ])
+
+            )
+
+            story.append(
+                semester_table
+            )
+
+            story.append(
+                Spacer(
+                    1,
+                    3 * mm
+                )
+            )
+
+    # ========================================================
+    # COUNSELLING / REPORT INFORMATION
+    # ========================================================
+
+    story.append(
+
+        Paragraph(
+
+            "COUNSELLING / REPORT INFORMATION",
+
+            section_style
+
+        )
+
+    )
+
+    report_info_table = Table(
+
+        [
+
+            [
+
+                _pdf_paragraph(
+                    "Counsellor",
+                    small_bold_style
+                ),
+
+                _pdf_paragraph(
+                    counsellor_name,
+                    body_style
+                )
+
+            ],
+
+            [
+
+                _pdf_paragraph(
+                    "Emp ID",
+                    small_bold_style
+                ),
+
+                _pdf_paragraph(
+                    emp_id,
+                    body_style
+                )
+
+            ],
+
+            [
+
+                _pdf_paragraph(
+                    "Report Generated",
+                    small_bold_style
+                ),
+
+                _pdf_paragraph(
+
+                    datetime.now().strftime(
+                        "%d-%m-%Y %I:%M %p"
+                    ),
+
+                    body_style
+
+                )
+
+            ]
+
+        ],
+
+        colWidths=[
+
+            40 * mm,
+            146 * mm
+
+        ]
+
+    )
+
+    report_info_table.setStyle(
+
+        TableStyle([
+
+            (
+                "BACKGROUND",
+                (0, 0),
+                (0, -1),
+                colors.HexColor(
+                    "#eef4f9"
+                )
+            ),
+
+            (
+                "GRID",
+                (0, 0),
+                (-1, -1),
+                0.35,
+                colors.HexColor(
+                    "#dbe5ef"
+                )
+            ),
+
+            (
+                "VALIGN",
+                (0, 0),
+                (-1, -1),
+                "MIDDLE"
+            ),
+
+            (
+                "TOPPADDING",
+                (0, 0),
+                (-1, -1),
+                5
+            ),
+
+            (
+                "BOTTOMPADDING",
+                (0, 0),
+                (-1, -1),
+                5
+            )
+
+        ])
+
+    )
+
+    story.append(
+        report_info_table
+    )
+
+    story.append(
+        Spacer(
+            1,
+            6 * mm
+        )
+    )
+
+    story.append(
+
+        Paragraph(
+
+            "This report is generated from the "
+            "academic records available in the "
+            "Student Academic Performance Portal.",
+
+            ParagraphStyle(
+
+                "Disclaimer",
+
+                parent=small_style,
+
+                alignment=TA_CENTER,
+
+                textColor=colors.HexColor(
+                    "#64748b"
+                )
+
+            )
+
+        )
+
+    )
+
+    # ========================================================
+    # PAGE NUMBER
+    # ========================================================
+
+    def add_page_number(
+        canvas,
+        doc
+    ):
+
+        canvas.saveState()
+
+        canvas.setFont(
+            "Helvetica",
+            7
+        )
+
+        canvas.setFillColor(
+            colors.HexColor(
+                "#64748b"
+            )
+        )
+
+        canvas.drawCentredString(
+
+            A4[0] / 2,
+
+            7 * mm,
+
+            "KLEF • Department of CSE-4 • "
+            "Student Academic Performance Portal • "
+            f"Page {doc.page}"
+
+        )
+
+        canvas.restoreState()
+
+    # ========================================================
+    # BUILD PDF
+    # ========================================================
+
+    doc.build(
+
+        story,
+
+        onFirstPage=add_page_number,
+
+        onLaterPages=add_page_number
+
+    )
+
+    buffer.seek(0)
+
+    return buffer.getvalue()
+
 
 # ============================================================
 # SEMESTER MAPPING
