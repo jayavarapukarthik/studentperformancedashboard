@@ -4562,101 +4562,101 @@ if search_clicked:
                     "for this student."
                 )
 
-        # ============================================================
-        # PARENT ACADEMIC REPORT
-        # ============================================================
+            # ============================================================
+            # PARENT ACADEMIC REPORT
+            # ============================================================
 
-        st.html("""
-        <div class="parent-report-card">
+            st.html("""
+            <div class="parent-report-card">
 
-            <div class="parent-report-title">
-                📄 PARENT ACADEMIC REPORT
+                <div class="parent-report-title">
+                    📄 PARENT ACADEMIC REPORT
+                </div>
+
+                <div class="parent-report-subtitle">
+                    Download a printable PDF containing the student's
+                    complete academic details, in-semester performance,
+                    academic highlights, semester-wise results,
+                    CGPA and counselling information.
+                </div>
+
+                <div class="parent-report-note">
+                    The report is generated for the student currently
+                    displayed above.
+                </div>
+
             </div>
-
-            <div class="parent-report-subtitle">
-                Download a printable PDF containing the student's
-                complete academic details, in-semester performance,
-                academic highlights, semester-wise results,
-                CGPA and counselling information.
-            </div>
-
-            <div class="parent-report-note">
-                The report is generated for the student currently
-                displayed above.
-            </div>
-
-        </div>
-        """)
+            """)
 
 
-        # ============================================================
-        # GENERATE PARENT PDF
-        # ============================================================
+            # ============================================================
+            # GENERATE PARENT PDF
+            # ============================================================
 
-        try:
+            try:
 
-            parent_pdf = build_parent_report_pdf(
+                parent_pdf = build_parent_report_pdf(
 
-                student_id=student_id,
+                    student_id=student_id,
 
-                student_name=student_name,
+                    student_name=student_name,
 
-                counsellor_name=counsellor_name,
+                    counsellor_name=counsellor_name,
 
-                emp_id=emp_id,
+                    emp_id=emp_id,
 
-                regulation=regulation,
+                    regulation=regulation,
 
-                cgpa_value=cgpa_value,
+                    cgpa_value=cgpa_value,
 
-                student_data=student_data,
+                    student_data=student_data,
 
-                result_data=result_data,
+                    result_data=result_data,
 
-                total_courses=total_courses,
+                    total_courses=total_courses,
 
-                passed_courses=passed_courses,
+                    passed_courses=passed_courses,
 
-                backlog_courses=backlog_courses,
+                    backlog_courses=backlog_courses,
 
-                category_counts=category_counts,
+                    category_counts=category_counts,
 
-                ordered_categories=ordered_categories
+                    ordered_categories=ordered_categories
 
-            )
-
-
-            # ========================================================
-            # DOWNLOAD BUTTON
-            # ========================================================
-
-            st.download_button(
-
-                label="🖨️ DOWNLOAD PARENT REPORT (PDF)",
-
-                data=parent_pdf,
-
-                file_name=(
-                    f"{student_id}_Parent_Academic_Report.pdf"
-                ),
-
-                mime="application/pdf",
-
-                use_container_width=True,
-
-                key=f"parent_pdf_{student_id}"
-
-            )
+                )
 
 
-        except Exception as pdf_error:
+                # ========================================================
+                # DOWNLOAD BUTTON
+                # ========================================================
 
-            st.error(
+                st.download_button(
 
-                "Unable to generate the Parent Academic Report. "
-                f"Details: {pdf_error}"
+                    label="🖨️ DOWNLOAD PARENT REPORT (PDF)",
 
-            )
+                    data=parent_pdf,
+
+                    file_name=(
+                        f"{student_id}_Parent_Academic_Report.pdf"
+                    ),
+
+                    mime="application/pdf",
+
+                    use_container_width=True,
+
+                    key=f"parent_pdf_{student_id}"
+
+                )
+
+
+            except Exception as pdf_error:
+
+                st.error(
+
+                    "Unable to generate the Parent Academic Report. "
+                    f"Details: {pdf_error}"
+
+                )
         # ====================================================
         # STUDENT NOT FOUND
         # ====================================================
