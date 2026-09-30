@@ -905,6 +905,56 @@ div[data-baseweb="input"] input {
     }
 }
 
+
+/* ============================================================
+   PARENT REPORT DOWNLOAD
+   ============================================================ */
+
+.parent-report-card {
+    margin-top: 32px;
+    background: linear-gradient(135deg, #ffffff 0%, #f3f8fc 100%);
+    border: 1px solid #cbdceb;
+    border-left: 6px solid #123b68;
+    border-radius: 17px;
+    padding: 20px 22px 18px 22px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+}
+
+.parent-report-title {
+    font-size: 22px;
+    font-weight: 850;
+    color: #123b68;
+    margin-bottom: 5px;
+}
+
+.parent-report-subtitle {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.parent-report-note {
+    font-size: 12px;
+    color: #475569;
+    margin-top: 8px;
+}
+
+div[data-testid="stDownloadButton"] button {
+    width: 100%;
+    min-height: 48px;
+    border-radius: 11px;
+    border: none;
+    font-size: 16px;
+    font-weight: 800;
+    color: white;
+    background: linear-gradient(135deg, #123b68, #1d5d91);
+    box-shadow: 0 6px 16px rgba(18, 59, 104, 0.20);
+}
+
+div[data-testid="stDownloadButton"] button:hover {
+    background: linear-gradient(135deg, #0f3157, #174f7d);
+}
+
 </style>
 """)
 
