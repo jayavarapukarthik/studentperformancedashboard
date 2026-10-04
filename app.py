@@ -20,6 +20,7 @@ from reportlab.platypus import (
     Spacer,
     Table,
     TableStyle,
+    KeepTogether,
 )
 # ============================================================
 # PAGE CONFIGURATION
@@ -2532,13 +2533,13 @@ def build_parent_report_pdf(
 
         pagesize=A4,
 
-        rightMargin=12 * mm,
+        rightMargin=9 * mm,
 
-        leftMargin=12 * mm,
+        leftMargin=9 * mm,
 
-        topMargin=9 * mm,
+        topMargin=7 * mm,
 
-        bottomMargin=10 * mm,
+        bottomMargin=7 * mm,
 
         title=(
             f"Parent Academic Report - "
@@ -2623,17 +2624,17 @@ def build_parent_report_pdf(
 
         fontName="Helvetica-Bold",
 
-        fontSize=11,
+        fontSize=10,
 
-        leading=14,
+        leading=11.5,
 
         textColor=colors.HexColor(
             "#123b68"
         ),
 
-        spaceBefore=5,
+        spaceBefore=2.5,
 
-        spaceAfter=4
+        spaceAfter=2.5
     )
 
     body_style = ParagraphStyle(
@@ -2644,9 +2645,9 @@ def build_parent_report_pdf(
 
         fontName="Helvetica",
 
-        fontSize=8,
+        fontSize=7.5,
 
-        leading=10,
+        leading=8.5,
 
         textColor=colors.HexColor(
             "#334155"
@@ -2659,9 +2660,9 @@ def build_parent_report_pdf(
 
         parent=body_style,
 
-        fontSize=7,
+        fontSize=6.5,
 
-        leading=8.5
+        leading=7.4
     )
 
     small_bold_style = ParagraphStyle(
@@ -2834,7 +2835,7 @@ def build_parent_report_pdf(
     story.append(
         Spacer(
             1,
-            6 * mm
+            3 * mm
         )
     )
 
@@ -3736,32 +3737,33 @@ def build_parent_report_pdf(
             semester_heading.keepWithNext = True
             semester_subheading.keepWithNext = True
 
-            story.append(semester_heading)
-
-            story.append(
-                Spacer(
-                    1,
-                    1.5 * mm
-                )
+            # IMPORTANT:
+            # Keep the complete semester block together. The report can
+            # still use only two pages, but a semester will never be split
+            # between two pages. If the complete semester block does not fit
+            # in the remaining space, ReportLab moves the whole block to the
+            # next page.
+            semester_block = KeepTogether(
+                [
+                    semester_heading,
+                    Spacer(
+                        1,
+                        1.5 * mm
+                    ),
+                    semester_subheading,
+                    Spacer(
+                        1,
+                        2.5 * mm
+                    ),
+                    semester_table,
+                    Spacer(
+                        1,
+                        2 * mm
+                    )
+                ]
             )
 
-            story.append(semester_subheading)
-
-            story.append(
-                Spacer(
-                    1,
-                    3 * mm
-                )
-            )
-
-            story.append(semester_table)
-
-            story.append(
-                Spacer(
-                    1,
-                    3 * mm
-                )
-            )
+            story.append(semester_block)
 
     # ========================================================
     # COUNSELLING / REPORT INFORMATION
@@ -3902,31 +3904,6 @@ def build_parent_report_pdf(
         )
     )
 
-    story.append(
-
-        Paragraph(
-
-            "This report is generated from the "
-            "academic records available in the "
-            "Student Academic Performance Portal.",
-
-            ParagraphStyle(
-
-                "Disclaimer",
-
-                parent=small_style,
-
-                alignment=TA_CENTER,
-
-                textColor=colors.HexColor(
-                    "#64748b"
-                )
-
-            )
-
-        )
-
-    )
 
     # ========================================================
     # PAGE NUMBER
@@ -3950,16 +3927,28 @@ def build_parent_report_pdf(
             )
         )
 
+        canvas.setFont(
+            "Helvetica",
+            6.2
+        )
+
         canvas.drawCentredString(
-
             A4[0] / 2,
+            10.5 * mm,
+            "Academic records available in the Student Academic Performance Portal."
+        )
 
-            7 * mm,
+        canvas.setFont(
+            "Helvetica",
+            7
+        )
 
+        canvas.drawCentredString(
+            A4[0] / 2,
+            6 * mm,
             "KLEF • Department of CSE-4 • "
             "Student Academic Performance Portal • "
             f"Page {doc.page}"
-
         )
 
         canvas.restoreState()
