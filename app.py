@@ -99,8 +99,8 @@ div[data-testid="stTextInput"] {
 }
 
 div[data-testid="stTextInput"] label {
-    font-size: 15px !important;
-    font-weight: 750 !important;
+    font-size: 18px !important;
+    font-weight: 800 !important;
     color: #243b53 !important;
     margin-bottom: 5px !important;
 }
@@ -113,9 +113,15 @@ div[data-testid="stTextInput"] input {
     border: 1.5px solid #c8d8e8 !important;
     background: #ffffff !important;
     padding: 0 15px !important;
-    font-size: 16px !important;
+    font-size: 19px !important;
     line-height: 52px !important;
     color: #243b53 !important;
+}
+
+div[data-testid="stTextInput"] input::placeholder {
+    font-size: 18px !important;
+    color: #7b8190 !important;
+    opacity: 1 !important;
 }
 
 div[data-testid="stTextInput"] input:focus {
@@ -141,7 +147,7 @@ div[data-testid="stTextInput"] button {
     border-radius: 12px;
     background: #f7fafc;
     color: #5d718b;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 650;
     padding: 8px 12px;
     margin-top: 12px;
