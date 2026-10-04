@@ -3627,10 +3627,18 @@ def build_regulation_summary(results_df):
         .reset_index()
     )
 
-    # Existing student count / passed count remain unchanged
-    # for the first graph.
+    # --------------------------------------------------------
+    # STUDENTS PASSED GRAPH:
+    # Ignore "-" category rows here as well.
+    #
+    # This uses the same meaningful-result dataset as the
+    # pass-percentage graph, so both charts use the same rule.
+    # A student is counted as passed when every remaining/latest
+    # course result is P.
+    # --------------------------------------------------------
+
     summary = (
-        student_status
+        percentage_student_status
         .groupby(
             "Regulation",
             dropna=False
@@ -3642,7 +3650,7 @@ def build_regulation_summary(results_df):
                     "nunique"
                 ),
                 "Passed Students": (
-                    "Passed",
+                    "Passed For Percentage",
                     "sum"
                 )
             }
@@ -3753,16 +3761,17 @@ def display_regulation_dashboard(results_df):
                 Students Passed — Regulation Wise
             </div>
             <div class="dashboard-card-note">
-                Students with no current backlog across their latest available results.
+                Passed students after excluding the "-" category from the calculation.
             </div>
         </div>
         """)
 
         fig_passed = px.bar(
             summary,
-            x="Regulation",
-            y="Passed Students",
+            y="Regulation",
+            x="Passed Students",
             text="Passed Students",
+            orientation="h",
             labels={
                 "Regulation": "Regulation",
                 "Passed Students": "Number of Students"
@@ -3777,13 +3786,17 @@ def display_regulation_dashboard(results_df):
             height=330,
             margin=dict(
                 l=20,
-                r=20,
+                r=45,
                 t=20,
                 b=20
             ),
             showlegend=False,
-            yaxis=dict(
+            xaxis=dict(
                 rangemode="tozero"
+            ),
+            yaxis=dict(
+                categoryorder="array",
+                categoryarray=["Y-23", "Y-24", "Y-25"]
             )
         )
 
@@ -3807,8 +3820,8 @@ def display_regulation_dashboard(results_df):
                 Pass Percentage — Regulation Wise
             </div>
             <div class="dashboard-card-note">
-                Passed students as a percentage of students with meaningful results;
-                "-" category is excluded from this calculation.
+                Passed students as a percentage of meaningful-result students;
+                "-" category is excluded.
             </div>
         </div>
         """)
