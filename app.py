@@ -79,6 +79,98 @@ st.html("""
 <style>
 
 /* ============================================================
+   TOP 3 STUDENTS — REGULATION WISE
+   ============================================================ */
+
+.top3-card {
+    margin-top: 24px;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, #ffffff 0%, #f4f8fc 100%);
+    border: 1px solid #d8e4ef;
+    border-left: 6px solid #123b68;
+    border-radius: 18px;
+    padding: 20px 22px 22px 22px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+}
+
+.top3-title {
+    font-size: 24px;
+    font-weight: 850;
+    color: #123b68;
+    margin-bottom: 4px;
+}
+
+.top3-subtitle {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 16px;
+}
+
+.top3-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #dbe5ef;
+    border-radius: 14px;
+}
+
+.top3-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    font-size: 14px;
+}
+
+.top3-table th {
+    background: #123b68;
+    color: #ffffff;
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.top3-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid #e6edf4;
+    color: #334155;
+    font-weight: 600;
+}
+
+.top3-table tr:last-child td {
+    border-bottom: none;
+}
+
+.top3-table .regulation-cell {
+    font-weight: 850;
+    color: #123b68;
+    white-space: nowrap;
+}
+
+.top3-table .cgpa-cell {
+    font-size: 16px;
+    font-weight: 850;
+    color: #123b68;
+}
+
+.top3-table .rank-cell {
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.top3-rank-1 {
+    color: #b8860b;
+}
+
+.top3-rank-2 {
+    color: #64748b;
+}
+
+.top3-rank-3 {
+    color: #a0522d;
+}
+
+
+/* ============================================================
    REGULATION-WISE PERFORMANCE DASHBOARD
    ============================================================ */
 
@@ -3713,6 +3805,346 @@ def build_regulation_summary(results_df):
 
 
 
+
+# ============================================================
+# TOP 3 STUDENTS — REGULATION WISE
+# ============================================================
+
+def display_top_students_by_regulation(
+    results_df,
+    cgpa_df,
+    mentor_df
+):
+    """
+    Display the top 3 students by CGPA for Y-23, Y-24 and Y-25.
+
+    Student identity and regulation come from the result data.
+    CGPA comes from CGPA.xlsx.
+    """
+
+    required_result_columns = [
+        "Student ID",
+        "Regulation"
+    ]
+
+    if (
+        not isinstance(results_df, pd.DataFrame)
+        or results_df.empty
+        or any(
+            column not in results_df.columns
+            for column in required_result_columns
+        )
+    ):
+        return
+
+    if (
+        not isinstance(cgpa_df, pd.DataFrame)
+        or cgpa_df.empty
+        or "Student ID" not in cgpa_df.columns
+        or "CGPA" not in cgpa_df.columns
+    ):
+        return
+
+    student_master = results_df[
+        [
+            column
+            for column in [
+                "Student ID",
+                "Regulation",
+                "Name"
+            ]
+            if column in results_df.columns
+        ]
+    ].copy()
+
+    student_master["Student ID"] = (
+        student_master["Student ID"]
+        .astype(str)
+        .str.strip()
+    )
+
+    student_master["Regulation"] = (
+        student_master["Regulation"]
+        .astype(str)
+        .str.strip()
+        .str.upper()
+    )
+
+    if "Name" in student_master.columns:
+        student_master["Name"] = (
+            student_master["Name"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .str.upper()
+        )
+    else:
+        student_master["Name"] = ""
+
+    # One row per student and regulation.
+    student_master = (
+        student_master
+        .sort_values(
+            [
+                "Regulation",
+                "Student ID"
+            ]
+        )
+        .drop_duplicates(
+            subset=[
+                "Regulation",
+                "Student ID"
+            ],
+            keep="first"
+        )
+    )
+
+    # If result data does not contain a usable name, use the
+    # Mentor-Mentee data as a fallback.
+    if isinstance(mentor_df, pd.DataFrame) and not mentor_df.empty:
+        mentor_required = [
+            column
+            for column in [
+                "Student ID",
+                "Student Name"
+            ]
+            if column in mentor_df.columns
+        ]
+
+        if len(mentor_required) == 2:
+            mentor_names = mentor_df[
+                mentor_required
+            ].copy()
+
+            mentor_names["Student ID"] = (
+                mentor_names["Student ID"]
+                .astype(str)
+                .str.strip()
+            )
+
+            mentor_names["Student Name"] = (
+                mentor_names["Student Name"]
+                .fillna("")
+                .astype(str)
+                .str.strip()
+                .str.upper()
+            )
+
+            mentor_names = (
+                mentor_names
+                .drop_duplicates(
+                    subset=["Student ID"],
+                    keep="first"
+                )
+                .rename(
+                    columns={
+                        "Student Name":
+                        "Mentor Name"
+                    }
+                )
+            )
+
+            student_master = student_master.merge(
+                mentor_names,
+                on="Student ID",
+                how="left"
+            )
+
+            student_master["Name"] = (
+                student_master["Name"]
+                .where(
+                    student_master["Name"].str.len() > 0,
+                    student_master["Mentor Name"]
+                )
+                .fillna("")
+            )
+
+    cgpa_data = cgpa_df[
+        [
+            "Student ID",
+            "CGPA"
+        ]
+    ].copy()
+
+    cgpa_data["Student ID"] = (
+        cgpa_data["Student ID"]
+        .astype(str)
+        .str.strip()
+    )
+
+    cgpa_data["CGPA"] = pd.to_numeric(
+        cgpa_data["CGPA"],
+        errors="coerce"
+    )
+
+    cgpa_data = (
+        cgpa_data
+        .dropna(
+            subset=["CGPA"]
+        )
+        .drop_duplicates(
+            subset=["Student ID"],
+            keep="first"
+        )
+    )
+
+    top_students = student_master.merge(
+        cgpa_data,
+        on="Student ID",
+        how="inner"
+    )
+
+    top_students = top_students[
+        top_students["Regulation"].isin(
+            [
+                "Y-23",
+                "Y-24",
+                "Y-25"
+            ]
+        )
+    ].copy()
+
+    if top_students.empty:
+        return
+
+    regulation_order = [
+        "Y-23",
+        "Y-24",
+        "Y-25"
+    ]
+
+    top_students["Regulation Sort"] = (
+        top_students["Regulation"].map(
+            {
+                "Y-23": 1,
+                "Y-24": 2,
+                "Y-25": 3
+            }
+        )
+    )
+
+    top_students = (
+        top_students
+        .sort_values(
+            [
+                "Regulation Sort",
+                "CGPA",
+                "Student ID"
+            ],
+            ascending=[
+                True,
+                False,
+                True
+            ]
+        )
+        .groupby(
+            "Regulation",
+            sort=False,
+            group_keys=False
+        )
+        .head(3)
+        .copy()
+    )
+
+    top_students["Rank"] = (
+        top_students
+        .groupby("Regulation")
+        .cumcount()
+        + 1
+    )
+
+    rows_html = []
+
+    for _, row in top_students.iterrows():
+
+        rank = int(row["Rank"])
+        regulation = html.escape(
+            str(row["Regulation"])
+        )
+        student_id = html.escape(
+            str(row["Student ID"])
+        )
+        student_name = html.escape(
+            str(row["Name"])
+            if str(row["Name"]).strip()
+            else "NOT AVAILABLE"
+        )
+        cgpa = f"{float(row['CGPA']):.2f}"
+
+        if rank == 1:
+            rank_class = "top3-rank-1"
+            rank_text = "🥇 1"
+        elif rank == 2:
+            rank_class = "top3-rank-2"
+            rank_text = "🥈 2"
+        else:
+            rank_class = "top3-rank-3"
+            rank_text = "🥉 3"
+
+        rows_html.append(
+            f"""
+            <tr>
+                <td class="rank-cell {rank_class}">
+                    {rank_text}
+                </td>
+                <td class="regulation-cell">
+                    {regulation}
+                </td>
+                <td>
+                    {student_id}
+                </td>
+                <td>
+                    {student_name}
+                </td>
+                <td class="cgpa-cell">
+                    {cgpa}
+                </td>
+            </tr>
+            """
+        )
+
+    st.html(
+        """
+        <div class="top3-card">
+
+            <div class="top3-title">
+                🏆 TOP 3 ACADEMIC PERFORMERS — REGULATION WISE
+            </div>
+
+            <div class="top3-subtitle">
+                Top three students in Y-23, Y-24 and Y-25 based on CGPA.
+            </div>
+
+            <div class="top3-table-wrap">
+
+                <table class="top3-table">
+
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Regulation</th>
+                            <th>Student ID</th>
+                            <th>Student Name</th>
+                            <th>CGPA</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+        """
+        + "".join(rows_html)
+        +
+        """
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+        """
+    )
+
+
 # ============================================================
 # REGULATION-WISE PERFORMANCE DASHBOARD
 # ============================================================
@@ -3761,17 +4193,17 @@ def display_regulation_dashboard(results_df):
                 Students Passed — Regulation Wise
             </div>
             <div class="dashboard-card-note">
-                Passed students after excluding the "-" category from the calculation,
-                shown as a proportion of passed students by regulation.
+                Number of students who passed in each regulation after excluding
+                the "-" category from the calculation.
             </div>
         </div>
         """)
 
-        fig_passed = px.pie(
+        fig_passed = px.bar(
             summary,
-            names="Regulation",
-            values="Passed Students",
-            hole=0.38,
+            x="Regulation",
+            y="Passed Students",
+            text="Passed Students",
             labels={
                 "Regulation": "Regulation",
                 "Passed Students": "Number of Students"
@@ -3779,32 +4211,30 @@ def display_regulation_dashboard(results_df):
         )
 
         fig_passed.update_traces(
-            textinfo="label+value+percent",
-            texttemplate="%{label}<br>%{value} students<br>(%{percent})",
             textposition="outside",
-            hovertemplate=(
-                "<b>%{label}</b><br>"
-                "Passed Students: %{value}<br>"
-                "Share: %{percent}<extra></extra>"
-            )
+            cliponaxis=False
         )
 
         fig_passed.update_layout(
             height=390,
             margin=dict(
-                l=20,
-                r=20,
-                t=15,
-                b=20
+                l=25,
+                r=25,
+                t=20,
+                b=30
             ),
-            showlegend=True,
-            legend_title_text="Regulation",
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=-0.12,
-                xanchor="center",
-                x=0.5
+            showlegend=False,
+            xaxis=dict(
+                categoryorder="array",
+                categoryarray=[
+                    "Y-23",
+                    "Y-24",
+                    "Y-25"
+                ]
+            ),
+            yaxis=dict(
+                title="Number of Students",
+                rangemode="tozero"
             )
         )
 
@@ -3967,6 +4397,17 @@ display_regulation_dashboard(
     results_df
 )
 
+
+
+# ============================================================
+# TOP 3 STUDENTS — REGULATION WISE
+# ============================================================
+
+display_top_students_by_regulation(
+    results_df,
+    cgpa_df,
+    mentor_df
+)
 
 
 # ============================================================
