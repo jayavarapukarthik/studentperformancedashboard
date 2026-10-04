@@ -1780,9 +1780,9 @@ def render_login_page():
 
         div[data-testid="stForm"] label {{
             color: #083d78 !important;
-            font-size: 15px !important;
+            font-size: 18px !important;
             font-weight: 850 !important;
-            margin-bottom: 3px !important;
+            margin-bottom: 4px !important;
         }}
 
         div[data-testid="stForm"] input {{
@@ -1792,14 +1792,16 @@ def render_login_page():
             border: 1.5px solid #c9dced !important;
             background: rgba(255, 255, 255, 0.98) !important;
             color: #17395f !important;
-            font-size: 15px !important;
-            padding-left: 13px !important;
+            font-size: 18px !important;
+            font-weight: 600 !important;
+            padding-left: 14px !important;
             box-shadow: 0 2px 8px rgba(22, 79, 130, 0.05) !important;
         }}
 
         div[data-testid="stForm"] input::placeholder {{
             color: #7c8797 !important;
-            font-size: 15px !important;
+            font-size: 18px !important;
+            font-weight: 500 !important;
             opacity: 1 !important;
         }}
 
@@ -1821,7 +1823,7 @@ def render_login_page():
                     #0649a8 100%
                 ) !important;
             color: white !important;
-            font-size: 15px !important;
+            font-size: 17px !important;
             font-weight: 850 !important;
             box-shadow:
                 0 8px 18px rgba(0, 91, 190, 0.22) !important;
@@ -1876,11 +1878,11 @@ def render_login_page():
             }}
 
             div[data-testid="stForm"] label {{
-                font-size: 15px !important;
+                font-size: 17px !important;
             }}
 
             div[data-testid="stForm"] input {{
-                font-size: 16px !important;
+                font-size: 18px !important;
             }}
         }}
 
