@@ -20,7 +20,8 @@ from reportlab.platypus import (
     Spacer,
     Table,
     TableStyle,
-    KeepTogether
+    KeepTogether,
+    PageBreak
 )
 # ============================================================
 # PAGE CONFIGURATION
@@ -3433,18 +3434,6 @@ def build_parent_report_pdf(
     # SEMESTER-WISE PERFORMANCE
     # ========================================================
 
-    story.append(
-
-        Paragraph(
-
-            "SEMESTER-WISE ACADEMIC PERFORMANCE",
-
-            section_style
-
-        )
-
-    )
-
     if (
 
         isinstance(
@@ -3542,31 +3531,27 @@ def build_parent_report_pdf(
                 )
             )
 
-            story.append(
+            # Start every semester on a fresh page so that the
+            # semester heading and its result table stay together.
+            story.append(PageBreak())
 
-                Paragraph(
+            semester_heading = Paragraph(
 
-                    f"SEMESTER "
-                    f"{html.escape(_pdf_text(semester_number))}",
+                f"SEMESTER "
+                f"{html.escape(_pdf_text(semester_number))}",
 
-                    section_style
-
-                )
+                section_style
 
             )
 
-            story.append(
+            semester_subheading = Paragraph(
 
-                Paragraph(
+                "Academic Year: "
+                f"{html.escape(_pdf_text(ay_value))}"
+                "  |  "
+                f"{html.escape(_pdf_text(term_value))}",
 
-                    "Academic Year: "
-                    f"{html.escape(_pdf_text(ay_value))}"
-                    "  |  "
-                    f"{html.escape(_pdf_text(term_value))}",
-
-                    small_style
-
-                )
+                small_style
 
             )
 
@@ -3753,6 +3738,16 @@ def build_parent_report_pdf(
             story.append(
                 KeepTogether(
                     [
+                        semester_heading,
+                        Spacer(
+                            1,
+                            1.5 * mm
+                        ),
+                        semester_subheading,
+                        Spacer(
+                            1,
+                            3 * mm
+                        ),
                         semester_table,
                         Spacer(
                             1,
