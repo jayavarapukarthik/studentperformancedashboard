@@ -20,8 +20,6 @@ from reportlab.platypus import (
     Spacer,
     Table,
     TableStyle,
-    KeepTogether,
-    PageBreak
 )
 # ============================================================
 # PAGE CONFIGURATION
@@ -205,7 +203,7 @@ div[data-testid="stTextInput"] button {
     color: #ffffff;
     text-align: center;
     padding: 8px 7px;
-    font-size: 17px;
+    font-size: 19px;
     font-weight: 850;
     letter-spacing: 0.4px;
 }
@@ -213,7 +211,7 @@ div[data-testid="stTextInput"] button {
 .top3-regulation-subtitle {
     text-align: center;
     color: #64748b;
-    font-size: 10px;
+    font-size: 11px;
     padding: 5px 7px;
     background: #f6f9fc;
     border-bottom: 1px solid #e2eaf2;
@@ -229,19 +227,19 @@ div[data-testid="stTextInput"] button {
 .top3-mini-table th {
     background: #eef4f9;
     color: #334155;
-    padding: 7px 5px;
+    padding: 8px 5px;
     text-align: center;
-    font-size: 10px;
+    font-size: 11.5px;
     font-weight: 850;
     border-bottom: 1px solid #dbe5ef;
     white-space: nowrap;
 }
 
 .top3-mini-table td {
-    padding: 8px 5px;
+    padding: 9px 5px;
     border-bottom: 1px solid #e7edf3;
     color: #334155;
-    font-size: 10.5px;
+    font-size: 12px;
     font-weight: 650;
     vertical-align: middle;
     text-align: center;
@@ -259,12 +257,12 @@ div[data-testid="stTextInput"] button {
 
 .top3-mini-table .id-cell {
     width: 48%;
-    font-size: 9.5px;
+    font-size: 10.5px;
 }
 
 .top3-mini-table .cgpa-cell {
     width: 30%;
-    font-size: 13px;
+    font-size: 14.5px;
     font-weight: 900;
     color: #123b68;
 }
@@ -3531,10 +3529,6 @@ def build_parent_report_pdf(
                 )
             )
 
-            # Start every semester on a fresh page so that the
-            # semester heading and its result table stay together.
-            story.append(PageBreak())
-
             semester_heading = Paragraph(
 
                 f"SEMESTER "
@@ -3735,25 +3729,37 @@ def build_parent_report_pdf(
 
             )
 
+            # Keep the semester heading and academic-year line attached
+            # to the following table, while allowing the table itself to
+            # split naturally across pages. This keeps the complete report
+            # compact instead of forcing one page per semester.
+            semester_heading.keepWithNext = True
+            semester_subheading.keepWithNext = True
+
+            story.append(semester_heading)
+
             story.append(
-                KeepTogether(
-                    [
-                        semester_heading,
-                        Spacer(
-                            1,
-                            1.5 * mm
-                        ),
-                        semester_subheading,
-                        Spacer(
-                            1,
-                            3 * mm
-                        ),
-                        semester_table,
-                        Spacer(
-                            1,
-                            3 * mm
-                        )
-                    ]
+                Spacer(
+                    1,
+                    1.5 * mm
+                )
+            )
+
+            story.append(semester_subheading)
+
+            story.append(
+                Spacer(
+                    1,
+                    3 * mm
+                )
+            )
+
+            story.append(semester_table)
+
+            story.append(
+                Spacer(
+                    1,
+                    3 * mm
                 )
             )
 
