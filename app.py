@@ -3,6 +3,7 @@ import pandas as pd
 from pathlib import Path
 import html
 import re
+import plotly.express as px
 from io import BytesIO
 from datetime import datetime
 
@@ -76,6 +77,51 @@ CGPA_FILE = (
 
 st.html("""
 <style>
+
+/* ============================================================
+   REGULATION-WISE PERFORMANCE DASHBOARD
+   ============================================================ */
+
+.regulation-dashboard {
+    margin-top: 18px;
+    margin-bottom: 24px;
+}
+
+.dashboard-title {
+    font-size: 24px;
+    font-weight: 850;
+    color: #123b68;
+    margin-bottom: 4px;
+}
+
+.dashboard-subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 14px;
+}
+
+.dashboard-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f5f9fd 100%);
+    border: 1px solid #dbe5ef;
+    border-radius: 17px;
+    padding: 16px 18px 10px 18px;
+    box-shadow: 0 7px 22px rgba(15, 23, 42, 0.06);
+    height: 100%;
+}
+
+.dashboard-card-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #123b68;
+    margin-bottom: 2px;
+}
+
+.dashboard-card-note {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 5px;
+}
+
 
 /* ============================================================
    MAIN APPLICATION
@@ -3308,6 +3354,479 @@ def get_semester_number(
     )
 
 
+
+# ============================================================
+# REGULATION-WISE PERFORMANCE SUMMARY
+# ============================================================
+
+def build_regulation_summary(results_df):
+    """
+    Build regulation-wise student performance statistics.
+
+    Definitions:
+    - Passed Students:
+      Students whose latest available status for every course
+      is P (no current backlog).
+    - Pass Percentage:
+      Passed Students / Total Students * 100.
+    - Cleared All Backlogs:
+      Students who had a non-P result in an earlier attempt
+      for a course, but whose latest available status for that
+      course is P, and who currently have no backlog in any course.
+
+    Only P is treated as passed, consistent with the existing
+    Student Academic Performance Portal logic.
+    """
+
+    if (
+        not isinstance(results_df, pd.DataFrame)
+        or results_df.empty
+    ):
+        return pd.DataFrame(
+            columns=[
+                "Regulation",
+                "Total Students",
+                "Passed Students",
+                "Pass Percentage",
+                "Cleared All Backlogs"
+            ]
+        )
+
+    df = results_df.copy()
+
+    required_columns = [
+        "Student ID",
+        "Regulation",
+        "Course Code",
+        "Category"
+    ]
+
+    missing = [
+        column
+        for column in required_columns
+        if column not in df.columns
+    ]
+
+    if missing:
+        return pd.DataFrame(
+            columns=[
+                "Regulation",
+                "Total Students",
+                "Passed Students",
+                "Pass Percentage",
+                "Cleared All Backlogs"
+            ]
+        )
+
+    df["Student ID"] = (
+        df["Student ID"]
+        .astype(str)
+        .str.strip()
+    )
+
+    df["Regulation"] = (
+        df["Regulation"]
+        .astype(str)
+        .str.strip()
+    )
+
+    df["Course Code"] = (
+        df["Course Code"]
+        .astype(str)
+        .str.strip()
+    )
+
+    df["Category Clean"] = (
+        df["Category"]
+        .fillna("-")
+        .astype(str)
+        .str.strip()
+        .str.upper()
+    )
+
+    df.loc[
+        df["Category Clean"].isin(
+            ["", "NAN", "NONE"]
+        ),
+        "Category Clean"
+    ] = "-"
+
+    # Create a reliable semester order so repeated courses can
+    # be evaluated from earlier attempt -> latest attempt.
+    if "Semester Number" not in df.columns:
+        df["Semester Number"] = df.apply(
+            lambda row:
+            get_semester_number(
+                row.get("Regulation", ""),
+                row.get("AY", ""),
+                row.get("Semester", "")
+            ),
+            axis=1
+        )
+
+    semester_order = [
+        "1-1", "1-2",
+        "2-1", "2-2",
+        "3-1", "3-2",
+        "4-1", "4-2"
+    ]
+
+    semester_rank = {
+        value: index
+        for index, value
+        in enumerate(semester_order)
+    }
+
+    df["Semester Rank"] = (
+        df["Semester Number"]
+        .map(semester_rank)
+        .fillna(999)
+    )
+
+    # Preserve source order as a final tie-breaker.
+    df["_source_order"] = range(len(df))
+
+    # --------------------------------------------------------
+    # Historical backlog status for each student.
+    # --------------------------------------------------------
+
+    student_history = (
+        df.groupby(
+            ["Regulation", "Student ID"],
+            dropna=False
+        )["Category Clean"]
+        .apply(
+            lambda series:
+            (series != "P").any()
+        )
+        .reset_index(
+            name="Ever Had Backlog"
+        )
+    )
+
+    # --------------------------------------------------------
+    # Latest result for each student + course.
+    # --------------------------------------------------------
+
+    latest_course = (
+        df.sort_values(
+            by=[
+                "Regulation",
+                "Student ID",
+                "Course Code",
+                "Semester Rank",
+                "_source_order"
+            ]
+        )
+        .drop_duplicates(
+            subset=[
+                "Regulation",
+                "Student ID",
+                "Course Code"
+            ],
+            keep="last"
+        )
+        .copy()
+    )
+
+    latest_backlog = (
+        latest_course.groupby(
+            ["Regulation", "Student ID"],
+            dropna=False
+        )["Category Clean"]
+        .apply(
+            lambda series:
+            (series != "P").any()
+        )
+        .reset_index(
+            name="Current Backlog"
+        )
+    )
+
+    student_status = student_history.merge(
+        latest_backlog,
+        on=[
+            "Regulation",
+            "Student ID"
+        ],
+        how="left"
+    )
+
+    student_status["Passed"] = (
+        ~student_status["Current Backlog"]
+    )
+
+    student_status["Cleared All Backlogs"] = (
+        student_status["Ever Had Backlog"]
+        & ~student_status["Current Backlog"]
+    )
+
+    summary = (
+        student_status
+        .groupby(
+            "Regulation",
+            dropna=False
+        )
+        .agg(
+            **{
+                "Total Students": (
+                    "Student ID",
+                    "nunique"
+                ),
+                "Passed Students": (
+                    "Passed",
+                    "sum"
+                ),
+                "Cleared All Backlogs": (
+                    "Cleared All Backlogs",
+                    "sum"
+                )
+            }
+        )
+        .reset_index()
+    )
+
+    summary["Pass Percentage"] = (
+        summary["Passed Students"]
+        / summary["Total Students"]
+        * 100
+    )
+
+    regulation_order = [
+        "Y-23",
+        "Y-24",
+        "Y-25"
+    ]
+
+    summary["Regulation Sort"] = (
+        summary["Regulation"]
+        .map(
+            {
+                value: index
+                for index, value
+                in enumerate(regulation_order)
+            }
+        )
+        .fillna(999)
+    )
+
+    summary = (
+        summary
+        .sort_values(
+            "Regulation Sort"
+        )
+        .drop(
+            columns=[
+                "Regulation Sort"
+            ]
+        )
+        .reset_index(
+            drop=True
+        )
+    )
+
+    return summary
+
+
+# ============================================================
+# REGULATION-WISE PERFORMANCE DASHBOARD
+# ============================================================
+
+def display_regulation_dashboard(results_df):
+    """
+    Display regulation-wise bar charts for Y-23, Y-24 and Y-25.
+    """
+
+    summary = build_regulation_summary(
+        results_df
+    )
+
+    if summary.empty:
+        st.info(
+            "Regulation-wise performance data is not available."
+        )
+        return
+
+    st.html("""
+    <div class="regulation-dashboard">
+        <div class="dashboard-title">
+            📊 REGULATION-WISE ACADEMIC PERFORMANCE
+        </div>
+        <div class="dashboard-subtitle">
+            Comparison of student results across Y-23, Y-24 and Y-25 regulations.
+        </div>
+    </div>
+    """)
+
+    # --------------------------------------------------------
+    # Chart 1: Passed Students
+    # --------------------------------------------------------
+
+    col1, col2 = st.columns(
+        2,
+        gap="large"
+    )
+
+    with col1:
+
+        st.html("""
+        <div class="dashboard-card">
+            <div class="dashboard-card-title">
+                Students Passed — Regulation Wise
+            </div>
+            <div class="dashboard-card-note">
+                Students with no current backlog across their latest available results.
+            </div>
+        </div>
+        """)
+
+        fig_passed = px.bar(
+            summary,
+            x="Regulation",
+            y="Passed Students",
+            text="Passed Students",
+            labels={
+                "Regulation": "Regulation",
+                "Passed Students": "Number of Students"
+            }
+        )
+
+        fig_passed.update_traces(
+            textposition="outside"
+        )
+
+        fig_passed.update_layout(
+            height=330,
+            margin=dict(
+                l=20,
+                r=20,
+                t=20,
+                b=20
+            ),
+            showlegend=False,
+            yaxis=dict(
+                rangemode="tozero"
+            )
+        )
+
+        st.plotly_chart(
+            fig_passed,
+            use_container_width=True,
+            config={
+                "displayModeBar": False
+            }
+        )
+
+    # --------------------------------------------------------
+    # Chart 2: Pass Percentage
+    # --------------------------------------------------------
+
+    with col2:
+
+        st.html("""
+        <div class="dashboard-card">
+            <div class="dashboard-card-title">
+                Pass Percentage — Regulation Wise
+            </div>
+            <div class="dashboard-card-note">
+                Passed students as a percentage of total students in each regulation.
+            </div>
+        </div>
+        """)
+
+        fig_percentage = px.bar(
+            summary,
+            x="Regulation",
+            y="Pass Percentage",
+            text="Pass Percentage",
+            labels={
+                "Regulation": "Regulation",
+                "Pass Percentage": "Pass Percentage (%)"
+            }
+        )
+
+        fig_percentage.update_traces(
+            texttemplate="%{text:.1f}%",
+            textposition="outside"
+        )
+
+        fig_percentage.update_layout(
+            height=330,
+            margin=dict(
+                l=20,
+                r=20,
+                t=20,
+                b=20
+            ),
+            showlegend=False,
+            yaxis=dict(
+                range=[0, 100],
+                ticksuffix="%"
+            )
+        )
+
+        st.plotly_chart(
+            fig_percentage,
+            use_container_width=True,
+            config={
+                "displayModeBar": False
+            }
+        )
+
+    # --------------------------------------------------------
+    # Chart 3: Students who cleared all backlogs
+    # --------------------------------------------------------
+
+    st.html("""
+    <div class="dashboard-card">
+        <div class="dashboard-card-title">
+            Students Who Cleared All Backlogs — Regulation Wise
+        </div>
+        <div class="dashboard-card-note">
+            Students who had a non-P result earlier but whose latest available
+            status is now P for all courses.
+        </div>
+    </div>
+    """)
+
+    fig_cleared = px.bar(
+        summary,
+        x="Regulation",
+        y="Cleared All Backlogs",
+        text="Cleared All Backlogs",
+        labels={
+            "Regulation": "Regulation",
+            "Cleared All Backlogs": "Number of Students"
+        }
+    )
+
+    fig_cleared.update_traces(
+        textposition="outside"
+    )
+
+    fig_cleared.update_layout(
+        height=330,
+        margin=dict(
+            l=20,
+            r=20,
+            t=20,
+            b=20
+        ),
+        showlegend=False,
+        yaxis=dict(
+            rangemode="tozero"
+        )
+    )
+
+    st.plotly_chart(
+        fig_cleared,
+        use_container_width=True,
+        config={
+            "displayModeBar": False
+        }
+    )
+
+
 # ============================================================
 # LOAD DATA
 # ============================================================
@@ -3391,6 +3910,17 @@ st.html("""
 
 </div>
 """)
+
+
+
+# ============================================================
+# REGULATION-WISE PERFORMANCE DASHBOARD
+# ============================================================
+
+display_regulation_dashboard(
+    results_df
+)
+
 
 
 # ============================================================
