@@ -593,7 +593,7 @@ div[data-testid="stTextInput"] button {
 }
 
 .search-title {
-    font-size: 21px;
+    font-size: 20px;
 
     font-weight: 800;
 
@@ -629,7 +629,7 @@ div[data-baseweb="input"]:focus-within {
 }
 
 div[data-baseweb="input"] input {
-    font-size: 17px !important;
+    font-size: 16px !important;
 
     padding: 12px !important;
 
@@ -1113,7 +1113,7 @@ div[data-baseweb="input"] input {
     }
 
     .department-name {
-        font-size: 21px;
+        font-size: 20px;
     }
 
     .portal-name {
@@ -1243,13 +1243,13 @@ div[data-testid="stDownloadButton"] button:hover {
 }
 
 .compact-login-icon {
-    font-size: 21px;
+    font-size: 20px;
     margin-right: 7px;
 }
 
 .compact-login-title {
     color: #123b68;
-    font-size: 21px;
+    font-size: 20px;
     font-weight: 850;
     letter-spacing: 0.3px;
 }
@@ -1372,7 +1372,7 @@ div[data-testid="stFormSubmitButton"] button:hover {
     display: inline-block;
     margin-top: 10px;
     padding: 9px 24px;
-    font-size: 21px;
+    font-size: 20px;
     font-weight: 900;
     color: #ffffff;
     letter-spacing: 0.7px;
@@ -1724,8 +1724,8 @@ def render_login_page():
         /* Actual functional login form is positioned over the
            blank centre card in the artwork. */
         .premium-login-form-wrap {{
-            width: min(590px, 42vw);
-            margin: 320px auto 0 auto;
+            width: min(560px, 40vw);
+            margin: 285px auto 0 auto;
             position: relative;
             z-index: 20;
         }}
@@ -1733,7 +1733,7 @@ def render_login_page():
         .premium-login-form-heading {{
             text-align: center;
             color: #064ea3;
-            font-size: 25px;
+            font-size: 22px;
             line-height: 1.15;
             font-weight: 900;
             letter-spacing: 0.2px;
@@ -1743,16 +1743,16 @@ def render_login_page():
         .premium-login-form-description {{
             text-align: center;
             color: #526b8a;
-            font-size: 13px;
-            line-height: 1.35;
-            margin-bottom: 13px;
+            font-size: 12px;
+            line-height: 1.25;
+            margin-bottom: 8px;
         }}
 
         .premium-login-icon {{
             text-align: center;
-            font-size: 42px;
+            font-size: 34px;
             line-height: 1;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }}
 
         .premium-login-security {{
@@ -1760,10 +1760,10 @@ def render_login_page():
             background: rgba(235, 247, 255, 0.94);
             border-radius: 10px;
             color: #14508e;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
-            padding: 9px 10px;
-            margin-top: 10px;
+            padding: 7px 9px;
+            margin-top: 7px;
         }}
 
         /* Streamlit form itself is transparent so the artwork's
@@ -1780,26 +1780,26 @@ def render_login_page():
 
         div[data-testid="stForm"] label {{
             color: #083d78 !important;
-            font-size: 17px !important;
+            font-size: 15px !important;
             font-weight: 850 !important;
-            margin-bottom: 4px !important;
+            margin-bottom: 3px !important;
         }}
 
         div[data-testid="stForm"] input {{
-            height: 52px !important;
-            min-height: 52px !important;
+            height: 45px !important;
+            min-height: 45px !important;
             border-radius: 12px !important;
             border: 1.5px solid #c9dced !important;
             background: rgba(255, 255, 255, 0.98) !important;
             color: #17395f !important;
-            font-size: 18px !important;
-            padding-left: 15px !important;
+            font-size: 15px !important;
+            padding-left: 13px !important;
             box-shadow: 0 2px 8px rgba(22, 79, 130, 0.05) !important;
         }}
 
         div[data-testid="stForm"] input::placeholder {{
             color: #7c8797 !important;
-            font-size: 17px !important;
+            font-size: 15px !important;
             opacity: 1 !important;
         }}
 
@@ -1810,7 +1810,8 @@ def render_login_page():
         }}
 
         div[data-testid="stForm"] button {{
-            min-height: 52px !important;
+            min-height: 45px !important;
+            height: 45px !important;
             border: none !important;
             border-radius: 12px !important;
             background:
@@ -1820,7 +1821,7 @@ def render_login_page():
                     #0649a8 100%
                 ) !important;
             color: white !important;
-            font-size: 18px !important;
+            font-size: 15px !important;
             font-weight: 850 !important;
             box-shadow:
                 0 8px 18px rgba(0, 91, 190, 0.22) !important;
@@ -1845,16 +1846,16 @@ def render_login_page():
         /* Desktop */
         @media (min-width: 1200px) {{
             .premium-login-form-wrap {{
-                margin-top: 325px;
-                width: 590px;
+                margin-top: 285px;
+                width: 560px;
             }}
         }}
 
         /* Laptop */
         @media (min-width: 769px) and (max-width: 1199px) {{
             .premium-login-form-wrap {{
-                margin-top: 300px;
-                width: 540px;
+                margin-top: 265px;
+                width: 520px;
             }}
         }}
 
@@ -1866,20 +1867,20 @@ def render_login_page():
             }}
 
             .premium-login-form-wrap {{
-                width: calc(100% - 36px);
-                margin-top: 285px;
+                width: calc(100% - 28px);
+                margin-top: 245px;
             }}
 
             .premium-login-form-heading {{
-                font-size: 21px;
+                font-size: 20px;
             }}
 
             div[data-testid="stForm"] label {{
-                font-size: 16px !important;
+                font-size: 15px !important;
             }}
 
             div[data-testid="stForm"] input {{
-                font-size: 17px !important;
+                font-size: 16px !important;
             }}
         }}
 
