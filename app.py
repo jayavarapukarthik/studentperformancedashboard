@@ -3,6 +3,7 @@ import pandas as pd
 from pathlib import Path
 import html
 import re
+import hmac
 import plotly.express as px
 from io import BytesIO
 from datetime import datetime
@@ -68,6 +69,12 @@ Y25_FILE = (
 CGPA_FILE = (
     BASE_DIR /
     "CGPA.xlsx"
+)
+
+# SIGN-IN CREDENTIALS FILE
+SIGNIN_FILE = (
+    BASE_DIR /
+    "signindetails.csv"
 )
 
 
@@ -1097,8 +1104,420 @@ div[data-testid="stDownloadButton"] button:hover {
     background: linear-gradient(135deg, #0f3157, #174f7d);
 }
 
+
+/* ============================================================
+   LOGIN / SIGN-IN PAGE
+   ============================================================ */
+
+.login-card {
+    max-width: 620px;
+    margin: 30px auto 45px auto;
+    padding: 30px 34px 32px 34px;
+    background: linear-gradient(135deg, #ffffff 0%, #f4f8fc 100%);
+    border: 1px solid #d6e2ee;
+    border-radius: 22px;
+    border-top: 6px solid #123b68;
+    box-shadow: 0 14px 38px rgba(15, 23, 42, 0.10);
+    text-align: center;
+}
+
+.login-icon {
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 12px auto;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #123b68, #1f6aa5);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 8px 20px rgba(18, 59, 104, 0.22);
+}
+
+.login-title {
+    font-size: 28px;
+    font-weight: 850;
+    color: #123b68;
+    margin-bottom: 6px;
+}
+
+.login-subtitle {
+    font-size: 15px;
+    color: #64748b;
+    line-height: 1.55;
+    margin-bottom: 20px;
+}
+
+.login-security-note {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+div[data-testid="stForm"] {
+    max-width: 620px;
+    margin: 0 auto;
+    border: none;
+    background: transparent;
+}
+
+div[data-testid="stForm"] label {
+    color: #334155 !important;
+    font-weight: 750 !important;
+    font-size: 14px !important;
+}
+
+div[data-testid="stForm"] input {
+    border-radius: 11px !important;
+    border: 1px solid #cbd8e5 !important;
+    min-height: 46px !important;
+    font-size: 15px !important;
+}
+
+div[data-testid="stForm"] input:focus {
+    border-color: #1d5d91 !important;
+    box-shadow: 0 0 0 2px rgba(29, 93, 145, 0.12) !important;
+}
+
+div[data-testid="stFormSubmitButton"] button {
+    width: 100%;
+    min-height: 48px;
+    border-radius: 11px;
+    border: none;
+    font-size: 16px;
+    font-weight: 850;
+    color: white;
+    background: linear-gradient(135deg, #123b68, #1d5d91);
+    box-shadow: 0 7px 18px rgba(18, 59, 104, 0.20);
+}
+
+div[data-testid="stFormSubmitButton"] button:hover {
+    background: linear-gradient(135deg, #0f3157, #174f7d);
+}
+
+.login-error {
+    max-width: 620px;
+    margin: 0 auto 18px auto;
+}
+
+.logout-row {
+    display: flex;
+    justify-content: flex-end;
+    margin: -10px 0 8px 0;
+}
+
 </style>
 """)
+
+
+
+# ============================================================
+# AUTHENTICATION / LOGIN
+# ============================================================
+
+def render_premium_header():
+    """
+    Render the same KLEF portal header on both the login page
+    and the authenticated dashboard.
+    """
+
+    st.html("""
+    <div class="university-header">
+
+        <div class="university-name">
+            KONERU LAKSHMAIAH EDUCATION FOUNDATION
+        </div>
+
+        <div class="header-divider"></div>
+
+        <div class="department-name">
+            DEPARTMENT OF CSE-4
+        </div>
+
+        <div class="portal-name">
+            STUDENT ACADEMIC PERFORMANCE PORTAL
+        </div>
+
+        <div class="header-subtitle">
+            Academic Excellence • Performance Monitoring • Student Success
+        </div>
+
+    </div>
+    """)
+
+
+@st.cache_data
+def load_signin_credentials():
+    """
+    Load username/password credentials from signindetails.csv.
+
+    Supported column names include:
+    username / user name / user
+    password / passcode / pass
+
+    Passwords are compared exactly. No partial matching is used.
+    """
+
+    if not SIGNIN_FILE.exists():
+        raise FileNotFoundError(
+            "signindetails.csv was not found. "
+            "Please keep signindetails.csv in the same GitHub "
+            "repository folder as app.py."
+        )
+
+    df = pd.read_csv(
+        SIGNIN_FILE,
+        dtype=str,
+        keep_default_na=False
+    )
+
+    df.columns = [
+        str(column).strip()
+        for column in df.columns
+    ]
+
+    username_column = find_column(
+        df,
+        [
+            "username",
+            "user name",
+            "user",
+            "login",
+            "login id"
+        ]
+    )
+
+    password_column = find_column(
+        df,
+        [
+            "password",
+            "passcode",
+            "pass",
+            "pwd"
+        ]
+    )
+
+    if username_column is None:
+        raise ValueError(
+            "Username column was not found in signindetails.csv."
+        )
+
+    if password_column is None:
+        raise ValueError(
+            "Password column was not found in signindetails.csv."
+        )
+
+    credentials = df[
+        [
+            username_column,
+            password_column
+        ]
+    ].copy()
+
+    credentials.columns = [
+        "username",
+        "password"
+    ]
+
+    credentials["username"] = (
+        credentials["username"]
+        .astype(str)
+        .str.strip()
+    )
+
+    # IMPORTANT:
+    # Do NOT strip passwords. A password must match exactly.
+    credentials["password"] = (
+        credentials["password"]
+        .astype(str)
+    )
+
+    credentials = credentials[
+        credentials["username"] != ""
+    ].copy()
+
+    return credentials
+
+
+def authenticate_user(username, password):
+    """
+    Exact username/password authentication.
+
+    Example:
+    If the stored password is 12345 and the user enters 12346,
+    authentication fails and the dashboard is NOT opened.
+    """
+
+    credentials = load_signin_credentials()
+
+    username = str(username).strip()
+    password = str(password)
+
+    matching_users = credentials[
+        credentials["username"].str.casefold()
+        == username.casefold()
+    ]
+
+    if matching_users.empty:
+        return False
+
+    for stored_password in matching_users["password"].tolist():
+
+        if hmac.compare_digest(
+            password,
+            str(stored_password)
+        ):
+            return True
+
+    return False
+
+
+def render_login_page():
+    """
+    Beautiful KLEF sign-in page.
+    """
+
+    st.html("""
+    <div class="login-card">
+
+        <div class="login-icon">
+            🔐
+        </div>
+
+        <div class="login-title">
+            SIGN IN
+        </div>
+
+        <div class="login-subtitle">
+            Secure access to the Student Academic Performance Portal
+            <br>
+            Department of CSE-4
+        </div>
+
+    </div>
+    """)
+
+    # Center the actual Streamlit form.
+    left, center, right = st.columns(
+        [1, 2.2, 1]
+    )
+
+    with center:
+
+        with st.form(
+            "student_portal_login",
+            clear_on_submit=False
+        ):
+
+            username = st.text_input(
+                "Username",
+                placeholder="Enter your username",
+                autocomplete="username"
+            )
+
+            password = st.text_input(
+                "Password",
+                type="password",
+                placeholder="Enter your password",
+                autocomplete="current-password"
+            )
+
+            submitted = st.form_submit_button(
+                "🔐  SIGN IN",
+                use_container_width=True
+            )
+
+        if submitted:
+
+            if not username:
+                st.error(
+                    "Please enter your username."
+                )
+
+            elif not password:
+                st.error(
+                    "Please enter your password."
+                )
+
+            elif authenticate_user(
+                username,
+                password
+            ):
+
+                st.session_state[
+                    "authenticated"
+                ] = True
+
+                st.session_state[
+                    "authenticated_username"
+                ] = username.strip()
+
+                st.session_state[
+                    "show_auth_success"
+                ] = True
+
+                st.rerun()
+
+            else:
+
+                # Deliberately do not navigate to the dashboard.
+                st.error(
+                    "❌ Authentication failed. "
+                    "Invalid username or password."
+                )
+
+        st.markdown(
+            """
+            <div class="login-security-note">
+                🔒 Exact username and password validation is enabled.
+                <br>
+                Any incorrect character in the password will be rejected.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+def require_authentication():
+    """
+    Stop execution before any dashboard data is displayed
+    unless authentication succeeds.
+    """
+
+    if "authenticated" not in st.session_state:
+        st.session_state[
+            "authenticated"
+        ] = False
+
+    if "authenticated_username" not in st.session_state:
+        st.session_state[
+            "authenticated_username"
+        ] = ""
+
+    if "show_auth_success" not in st.session_state:
+        st.session_state[
+            "show_auth_success"
+        ] = False
+
+    render_premium_header()
+
+    if not st.session_state["authenticated"]:
+
+        render_login_page()
+
+        st.stop()
+
+    if st.session_state["show_auth_success"]:
+
+        st.success(
+            "✅ Authentication successful! "
+            "Welcome to the Student Academic Performance Portal."
+        )
+
+        st.session_state[
+            "show_auth_success"
+        ] = False
 
 
 # ============================================================
@@ -4343,6 +4762,14 @@ def display_regulation_dashboard(results_df):
         )
 
 # ============================================================
+# REQUIRE LOGIN BEFORE OPENING THE DASHBOARD
+# ============================================================
+
+require_authentication()
+
+
+
+# ============================================================
 # LOAD DATA
 # ============================================================
 
@@ -4398,33 +4825,55 @@ except Exception as e:
     st.stop()
 
 
+st.markdown(
+    f"""
+    <div style="
+        text-align:right;
+        color:#64748b;
+        font-size:13px;
+        font-weight:700;
+        margin:4px 4px 10px 0;
+    ">
+        Signed in as:
+        <span style="color:#123b68;">
+            {html.escape(
+                st.session_state.get(
+                    "authenticated_username",
+                    ""
+                )
+            )}
+        </span>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
+
 # ============================================================
-# PREMIUM HEADER
+# LOGOUT
 # ============================================================
 
-st.html("""
-<div class="university-header">
+logout_left, logout_right = st.columns(
+    [8.8, 1.2]
+)
 
-    <div class="university-name">
-        KONERU LAKSHMAIAH EDUCATION FOUNDATION
-    </div>
+with logout_right:
 
-    <div class="header-divider"></div>
+    if st.button(
+        "Logout",
+        use_container_width=True
+    ):
 
-    <div class="department-name">
-        DEPARTMENT OF CSE-4
-    </div>
+        st.session_state[
+            "authenticated"
+        ] = False
 
-    <div class="portal-name">
-        STUDENT ACADEMIC PERFORMANCE PORTAL
-    </div>
+        st.session_state[
+            "authenticated_username"
+        ] = ""
 
-    <div class="header-subtitle">
-        Academic Excellence • Performance Monitoring • Student Success
-    </div>
-
-</div>
-""")
+        st.rerun()
 
 
 
