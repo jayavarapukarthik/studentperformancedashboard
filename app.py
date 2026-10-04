@@ -1885,7 +1885,7 @@ def render_login_page():
 
         </style>
         """,
-        unsafe_allow_html=False
+        unsafe_allow_html=True
     )
 
     st.html(
