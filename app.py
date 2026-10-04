@@ -7,6 +7,7 @@ import hmac
 import plotly.express as px
 from io import BytesIO
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
@@ -1106,58 +1107,53 @@ div[data-testid="stDownloadButton"] button:hover {
 
 
 /* ============================================================
-   LOGIN / SIGN-IN PAGE
+   COMPACT LOGIN / SIGN-IN PAGE
    ============================================================ */
 
-.login-card {
+.compact-login-heading {
     max-width: 620px;
-    margin: 30px auto 45px auto;
-    padding: 30px 34px 32px 34px;
+    margin: 16px auto 10px auto;
+    padding: 12px 18px;
     background: linear-gradient(135deg, #ffffff 0%, #f4f8fc 100%);
     border: 1px solid #d6e2ee;
-    border-radius: 22px;
-    border-top: 6px solid #123b68;
-    box-shadow: 0 14px 38px rgba(15, 23, 42, 0.10);
+    border-left: 5px solid #123b68;
+    border-radius: 13px;
+    box-shadow: 0 5px 16px rgba(15, 23, 42, 0.06);
     text-align: center;
 }
 
-.login-icon {
-    width: 68px;
-    height: 68px;
-    margin: 0 auto 12px auto;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #123b68, #1f6aa5);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    box-shadow: 0 8px 20px rgba(18, 59, 104, 0.22);
+.compact-login-icon {
+    font-size: 21px;
+    margin-right: 7px;
 }
 
-.login-title {
-    font-size: 28px;
-    font-weight: 850;
+.compact-login-title {
     color: #123b68;
-    margin-bottom: 6px;
+    font-size: 21px;
+    font-weight: 850;
+    letter-spacing: 0.3px;
 }
 
-.login-subtitle {
-    font-size: 15px;
+.compact-login-subtitle {
+    display: block;
+    margin-top: 2px;
     color: #64748b;
-    line-height: 1.55;
-    margin-bottom: 20px;
-}
-
-.login-security-note {
-    margin-top: 12px;
     font-size: 12px;
+    line-height: 1.35;
+}
+
+.compact-login-note {
+    margin-top: 7px;
+    text-align: center;
     color: #64748b;
+    font-size: 11px;
+    line-height: 1.35;
 }
 
 div[data-testid="stForm"] {
     max-width: 620px;
     margin: 0 auto;
+    padding: 4px 0 0 0;
     border: none;
     background: transparent;
 }
@@ -1165,14 +1161,14 @@ div[data-testid="stForm"] {
 div[data-testid="stForm"] label {
     color: #334155 !important;
     font-weight: 750 !important;
-    font-size: 14px !important;
+    font-size: 13px !important;
 }
 
 div[data-testid="stForm"] input {
-    border-radius: 11px !important;
+    border-radius: 9px !important;
     border: 1px solid #cbd8e5 !important;
-    min-height: 46px !important;
-    font-size: 15px !important;
+    min-height: 42px !important;
+    font-size: 14px !important;
 }
 
 div[data-testid="stForm"] input:focus {
@@ -1182,29 +1178,19 @@ div[data-testid="stForm"] input:focus {
 
 div[data-testid="stFormSubmitButton"] button {
     width: 100%;
-    min-height: 48px;
-    border-radius: 11px;
+    min-height: 43px;
+    margin-top: 4px;
+    border-radius: 9px;
     border: none;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 850;
     color: white;
     background: linear-gradient(135deg, #123b68, #1d5d91);
-    box-shadow: 0 7px 18px rgba(18, 59, 104, 0.20);
+    box-shadow: 0 5px 14px rgba(18, 59, 104, 0.18);
 }
 
 div[data-testid="stFormSubmitButton"] button:hover {
     background: linear-gradient(135deg, #0f3157, #174f7d);
-}
-
-.login-error {
-    max-width: 620px;
-    margin: 0 auto 18px auto;
-}
-
-.logout-row {
-    display: flex;
-    justify-content: flex-end;
-    margin: -10px 0 8px 0;
 }
 
 </style>
@@ -1375,32 +1361,24 @@ def authenticate_user(username, password):
 
 def render_login_page():
     """
-    Beautiful KLEF sign-in page.
+    Compact KLEF sign-in page designed to fit on one screen.
     """
 
     st.html("""
-    <div class="login-card">
-
-        <div class="login-icon">
-            🔐
-        </div>
-
-        <div class="login-title">
-            SIGN IN
-        </div>
-
-        <div class="login-subtitle">
-            Secure access to the Student Academic Performance Portal
-            <br>
-            Department of CSE-4
-        </div>
-
+    <div class="compact-login-heading">
+        <span class="compact-login-icon">🔐</span>
+        <span class="compact-login-title">
+            SECURE PORTAL LOGIN
+        </span>
+        <span class="compact-login-subtitle">
+            Enter your username and password to continue
+        </span>
     </div>
     """)
 
     # Center the actual Streamlit form.
     left, center, right = st.columns(
-        [1, 2.2, 1]
+        [1.4, 2.2, 1.4]
     )
 
     with center:
@@ -1424,7 +1402,7 @@ def render_login_page():
             )
 
             submitted = st.form_submit_button(
-                "🔐  SIGN IN",
+                "🔐  LOGIN",
                 use_container_width=True
             )
 
@@ -1453,15 +1431,12 @@ def render_login_page():
                     "authenticated_username"
                 ] = username.strip()
 
-                st.session_state[
-                    "show_auth_success"
-                ] = True
-
+                # No large authentication-success message is shown.
                 st.rerun()
 
             else:
 
-                # Deliberately do not navigate to the dashboard.
+                # Wrong username/password never opens the dashboard.
                 st.error(
                     "❌ Authentication failed. "
                     "Invalid username or password."
@@ -1469,10 +1444,9 @@ def render_login_page():
 
         st.markdown(
             """
-            <div class="login-security-note">
-                🔒 Exact username and password validation is enabled.
-                <br>
-                Any incorrect character in the password will be rejected.
+            <div class="compact-login-note">
+                🔒 Password is validated exactly.
+                Any incorrect character will be rejected.
             </div>
             """,
             unsafe_allow_html=True
@@ -1495,11 +1469,6 @@ def require_authentication():
             "authenticated_username"
         ] = ""
 
-    if "show_auth_success" not in st.session_state:
-        st.session_state[
-            "show_auth_success"
-        ] = False
-
     render_premium_header()
 
     if not st.session_state["authenticated"]:
@@ -1507,17 +1476,6 @@ def require_authentication():
         render_login_page()
 
         st.stop()
-
-    if st.session_state["show_auth_success"]:
-
-        st.success(
-            "✅ Authentication successful! "
-            "Welcome to the Student Academic Performance Portal."
-        )
-
-        st.session_state[
-            "show_auth_success"
-        ] = False
 
 
 # ============================================================
@@ -3538,7 +3496,9 @@ def build_parent_report_pdf(
 
                 _pdf_paragraph(
 
-                    datetime.now().strftime(
+                    datetime.now(
+                        ZoneInfo("Asia/Kolkata")
+                    ).strftime(
                         "%d-%m-%Y %I:%M %p"
                     ),
 
