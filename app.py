@@ -3713,6 +3713,186 @@ def build_regulation_summary(results_df):
     return summary
 
 
+
+# ============================================================
+# REGULATION-WISE GRADE DISTRIBUTION
+# ============================================================
+
+def build_grade_distribution(results_df):
+    """
+    Count unique students receiving each academic grade
+    in each regulation.
+
+    A student is counted once per grade per regulation even if
+    the student received that same grade in multiple courses.
+
+    Placeholder / non-grade values are excluded.
+    """
+
+    if (
+        not isinstance(results_df, pd.DataFrame)
+        or results_df.empty
+    ):
+        return pd.DataFrame(
+            columns=[
+                "Regulation",
+                "Grade",
+                "Students"
+            ]
+        )
+
+    required_columns = [
+        "Student ID",
+        "Regulation",
+        "Grade"
+    ]
+
+    if any(
+        column not in results_df.columns
+        for column in required_columns
+    ):
+        return pd.DataFrame(
+            columns=[
+                "Regulation",
+                "Grade",
+                "Students"
+            ]
+        )
+
+    grade_df = results_df[
+        required_columns
+    ].copy()
+
+    grade_df["Student ID"] = (
+        grade_df["Student ID"]
+        .astype(str)
+        .str.strip()
+    )
+
+    grade_df["Regulation"] = (
+        grade_df["Regulation"]
+        .astype(str)
+        .str.strip()
+    )
+
+    grade_df["Grade"] = (
+        grade_df["Grade"]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+        .str.upper()
+    )
+
+    # Exclude blank / placeholder / non-academic-grade values.
+    excluded_grades = {
+        "",
+        "-",
+        "NAN",
+        "NONE",
+        "NA",
+        "N/A",
+        "AB"
+    }
+
+    grade_df = grade_df[
+        ~grade_df["Grade"].isin(
+            excluded_grades
+        )
+    ].copy()
+
+    if grade_df.empty:
+        return pd.DataFrame(
+            columns=[
+                "Regulation",
+                "Grade",
+                "Students"
+            ]
+        )
+
+    # One student is counted once for each grade.
+    distribution = (
+        grade_df
+        .drop_duplicates(
+            subset=[
+                "Regulation",
+                "Student ID",
+                "Grade"
+            ]
+        )
+        .groupby(
+            [
+                "Regulation",
+                "Grade"
+            ],
+            as_index=False
+        )
+        .agg(
+            Students=(
+                "Student ID",
+                "nunique"
+            )
+        )
+    )
+
+    # Standard academic-grade order.
+    standard_order = [
+        "O",
+        "A+",
+        "A",
+        "B+",
+        "B",
+        "C",
+        "D",
+        "F"
+    ]
+
+    existing_grades = (
+        distribution["Grade"]
+        .dropna()
+        .unique()
+        .tolist()
+    )
+
+    ordered_grades = [
+        grade
+        for grade in standard_order
+        if grade in existing_grades
+    ]
+
+    # Keep any additional genuine grade values after
+    # the standard order.
+    ordered_grades.extend(
+        sorted(
+            [
+                grade
+                for grade in existing_grades
+                if grade not in ordered_grades
+            ]
+        )
+    )
+
+    distribution["Grade"] = pd.Categorical(
+        distribution["Grade"],
+        categories=ordered_grades,
+        ordered=True
+    )
+
+    distribution = (
+        distribution
+        .sort_values(
+            [
+                "Grade",
+                "Regulation"
+            ]
+        )
+        .reset_index(
+            drop=True
+        )
+    )
+
+    return distribution
+
+
 # ============================================================
 # REGULATION-WISE PERFORMANCE DASHBOARD
 # ============================================================
@@ -3864,6 +4044,98 @@ def display_regulation_dashboard(results_df):
                 "displayModeBar": False
             }
         )
+    # --------------------------------------------------------
+    # Chart 3: Grade Distribution
+    # --------------------------------------------------------
+
+    grade_distribution = build_grade_distribution(
+        results_df
+    )
+
+    if not grade_distribution.empty:
+
+        st.html("""
+        <div class="dashboard-card" style="margin-top: 20px;">
+            <div class="dashboard-card-title">
+                🎓 GRADE DISTRIBUTION — REGULATION WISE
+            </div>
+            <div class="dashboard-card-note">
+                Number of unique students receiving each academic grade.
+                A student is counted once per grade within a regulation.
+                "-", AB and blank/non-grade values are excluded.
+            </div>
+        </div>
+        """)
+
+        fig_grades = px.bar(
+            grade_distribution,
+            x="Grade",
+            y="Students",
+            color="Regulation",
+            barmode="group",
+            text="Students",
+            category_orders={
+                "Grade": [
+                    "O",
+                    "A+",
+                    "A",
+                    "B+",
+                    "B",
+                    "C",
+                    "D",
+                    "F"
+                ]
+            },
+            labels={
+                "Grade": "Grade",
+                "Students": "Number of Students",
+                "Regulation": "Regulation"
+            }
+        )
+
+        fig_grades.update_traces(
+            textposition="outside",
+            cliponaxis=False
+        )
+
+        fig_grades.update_layout(
+            height=470,
+            margin=dict(
+                l=35,
+                r=25,
+                t=25,
+                b=45
+            ),
+            barmode="group",
+            legend_title_text="Regulation",
+            xaxis=dict(
+                categoryorder="array",
+                categoryarray=[
+                    "O",
+                    "A+",
+                    "A",
+                    "B+",
+                    "B",
+                    "C",
+                    "D",
+                    "F"
+                ]
+            ),
+            yaxis=dict(
+                title="Number of Students",
+                rangemode="tozero"
+            )
+        )
+
+        st.plotly_chart(
+            fig_grades,
+            use_container_width=True,
+            config={
+                "displayModeBar": False
+            }
+        )
+
+
 
 # ============================================================
 # LOAD DATA
