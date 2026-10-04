@@ -1193,6 +1193,188 @@ div[data-testid="stFormSubmitButton"] button:hover {
     background: linear-gradient(135deg, #0f3157, #174f7d);
 }
 
+
+/* ============================================================
+   LOGIN PAGE — COMPACT HEADER
+   ============================================================ */
+
+.login-university-header {
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #f7fbff 48%,
+            #edf5fb 100%
+        );
+    padding: 18px 24px 16px 24px;
+    border-radius: 0 0 22px 22px;
+    border: 1px solid #dbe5ef;
+    border-top: 4px solid #123f6b;
+    box-shadow: 0 8px 24px rgba(15, 52, 86, 0.08);
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.login-university-name {
+    color: #123f6b;
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+    line-height: 1.1;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.login-header-divider {
+    width: 75px;
+    height: 4px;
+    margin: 8px auto 7px auto;
+    border-radius: 5px;
+    background: linear-gradient(
+        90deg,
+        #123f6b,
+        #2b78b5
+    );
+}
+
+.login-department-name {
+    color: #475569;
+    font-size: 17px;
+    font-weight: 850;
+    letter-spacing: 1.4px;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.login-portal-name {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 9px 24px;
+    font-size: 21px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: 0.7px;
+    line-height: 1.15;
+    text-transform: uppercase;
+    border-radius: 10px;
+    background:
+        linear-gradient(
+            135deg,
+            #0f3d68,
+            #1d6096
+        );
+    box-shadow:
+        0 5px 13px rgba(15,61,104,0.18);
+}
+
+.login-header-subtitle {
+    margin-top: 7px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+
+/* Compact login form card */
+.login-form-card {
+    max-width: 560px;
+    margin: 8px auto 10px auto;
+    padding: 16px 24px 13px 24px;
+    background: rgba(255,255,255,0.96);
+    border: 1px solid #d7e3ee;
+    border-radius: 16px;
+    box-shadow: 0 7px 22px rgba(15, 23, 42, 0.07);
+}
+
+.login-form-heading {
+    text-align: center;
+    color: #123b68;
+    font-size: 18px;
+    font-weight: 850;
+    margin-bottom: 2px;
+}
+
+.login-form-description {
+    text-align: center;
+    color: #64748b;
+    font-size: 11px;
+    margin-bottom: 9px;
+}
+
+.login-field-hint {
+    text-align: center;
+    color: #64748b;
+    font-size: 10.5px;
+    margin-top: 4px;
+}
+
+div[data-testid="stForm"] {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+div[data-testid="stForm"] label {
+    color: #243b53 !important;
+    font-weight: 800 !important;
+    font-size: 12px !important;
+}
+
+div[data-testid="stForm"] input {
+    border-radius: 9px !important;
+    border: 1px solid #c7d7e6 !important;
+    background: #f8fbfe !important;
+    min-height: 39px !important;
+    font-size: 13px !important;
+    padding-left: 12px !important;
+}
+
+div[data-testid="stForm"] input:hover {
+    border-color: #8eb2d0 !important;
+}
+
+div[data-testid="stForm"] input:focus {
+    border-color: #1d5d91 !important;
+    box-shadow: 0 0 0 2px rgba(29, 93, 145, 0.10) !important;
+    background: #ffffff !important;
+}
+
+div[data-testid="stFormSubmitButton"] button {
+    width: 100%;
+    min-height: 41px;
+    margin-top: 3px;
+    border-radius: 9px;
+    border: none;
+    font-size: 14px;
+    font-weight: 850;
+    color: white;
+    background: linear-gradient(135deg, #123b68, #1d5d91);
+    box-shadow: 0 5px 14px rgba(18, 59, 104, 0.18);
+}
+
+div[data-testid="stFormSubmitButton"] button:hover {
+    background: linear-gradient(135deg, #0f3157, #174f7d);
+}
+
+.login-security-note {
+    max-width: 560px;
+    margin: 4px auto 0 auto;
+    padding: 7px 12px;
+    text-align: center;
+    color: #64748b;
+    background: #f4f8fc;
+    border: 1px solid #e1eaf2;
+    border-radius: 8px;
+    font-size: 10px;
+    line-height: 1.3;
+}
+
 </style>
 """)
 
@@ -1204,33 +1386,64 @@ div[data-testid="stFormSubmitButton"] button:hover {
 
 def render_premium_header():
     """
-    Render the same KLEF portal header on both the login page
-    and the authenticated dashboard.
+    Render a compact header on the login page and the existing
+    full-size header after authentication.
     """
 
-    st.html("""
-    <div class="university-header">
+    if not st.session_state.get(
+        "authenticated",
+        False
+    ):
 
-        <div class="university-name">
-            KONERU LAKSHMAIAH EDUCATION FOUNDATION
+        st.html("""
+        <div class="login-university-header">
+
+            <div class="login-university-name">
+                KONERU LAKSHMAIAH EDUCATION FOUNDATION
+            </div>
+
+            <div class="login-header-divider"></div>
+
+            <div class="login-department-name">
+                DEPARTMENT OF CSE-4
+            </div>
+
+            <div class="login-portal-name">
+                STUDENT ACADEMIC PERFORMANCE PORTAL
+            </div>
+
+            <div class="login-header-subtitle">
+                ACADEMIC EXCELLENCE • PERFORMANCE MONITORING • STUDENT SUCCESS
+            </div>
+
         </div>
+        """)
 
-        <div class="header-divider"></div>
+    else:
 
-        <div class="department-name">
-            DEPARTMENT OF CSE-4
+        st.html("""
+        <div class="university-header">
+
+            <div class="university-name">
+                KONERU LAKSHMAIAH EDUCATION FOUNDATION
+            </div>
+
+            <div class="header-divider"></div>
+
+            <div class="department-name">
+                DEPARTMENT OF CSE-4
+            </div>
+
+            <div class="portal-name">
+                STUDENT ACADEMIC PERFORMANCE PORTAL
+            </div>
+
+            <div class="header-subtitle">
+                Academic Excellence • Performance Monitoring • Student Success
+            </div>
+
         </div>
-
-        <div class="portal-name">
-            STUDENT ACADEMIC PERFORMANCE PORTAL
-        </div>
-
-        <div class="header-subtitle">
-            Academic Excellence • Performance Monitoring • Student Success
-        </div>
-
-    </div>
-    """)
+        """)
 
 
 @st.cache_data
@@ -1365,20 +1578,22 @@ def render_login_page():
     """
 
     st.html("""
-    <div class="compact-login-heading">
-        <span class="compact-login-icon">🔐</span>
-        <span class="compact-login-title">
-            SECURE PORTAL LOGIN
-        </span>
-        <span class="compact-login-subtitle">
-            Enter your username and password to continue
-        </span>
+    <div class="login-form-card">
+
+        <div class="login-form-heading">
+            🔐 SECURE PORTAL LOGIN
+        </div>
+
+        <div class="login-form-description">
+            Authorized access for the Student Academic Performance Portal
+        </div>
+
     </div>
     """)
 
     # Center the actual Streamlit form.
     left, center, right = st.columns(
-        [1.4, 2.2, 1.4]
+        [1.8, 2.0, 1.8]
     )
 
     with center:
@@ -1444,9 +1659,8 @@ def render_login_page():
 
         st.markdown(
             """
-            <div class="compact-login-note">
-                🔒 Password is validated exactly.
-                Any incorrect character will be rejected.
+            <div class="login-security-note">
+                🔒 Exact password validation • One incorrect character will be rejected
             </div>
             """,
             unsafe_allow_html=True
