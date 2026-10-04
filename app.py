@@ -3387,8 +3387,7 @@ def build_regulation_summary(results_df):
                 "Regulation",
                 "Total Students",
                 "Passed Students",
-                "Pass Percentage",
-                "Cleared All Backlogs"
+                "Pass Percentage"
             ]
         )
 
@@ -3413,8 +3412,7 @@ def build_regulation_summary(results_df):
                 "Regulation",
                 "Total Students",
                 "Passed Students",
-                "Pass Percentage",
-                "Cleared All Backlogs"
+                "Pass Percentage"
             ]
         )
 
@@ -3556,11 +3554,81 @@ def build_regulation_summary(results_df):
         ~student_status["Current Backlog"]
     )
 
-    student_status["Cleared All Backlogs"] = (
-        student_status["Ever Had Backlog"]
-        & ~student_status["Current Backlog"]
+    # --------------------------------------------------------
+    # PASS PERCENTAGE ONLY:
+    # Ignore "-" category rows for every regulation.
+    #
+    # IMPORTANT:
+    # This calculation is separate from the "Students Passed"
+    # graph. The passed-student graph keeps the existing logic.
+    # For pass percentage, rows whose Category is "-" are
+    # completely excluded before deciding the student's latest
+    # course status.
+    # --------------------------------------------------------
+
+    percentage_df = df[
+        df["Category Clean"] != "-"
+    ].copy()
+
+    percentage_df = (
+        percentage_df
+        .sort_values(
+            by=[
+                "Regulation",
+                "Student ID",
+                "Course Code",
+                "Semester Rank",
+                "_source_order"
+            ]
+        )
+        .drop_duplicates(
+            subset=[
+                "Regulation",
+                "Student ID",
+                "Course Code"
+            ],
+            keep="last"
+        )
     )
 
+    percentage_student_status = (
+        percentage_df
+        .groupby(
+            ["Regulation", "Student ID"],
+            dropna=False
+        )["Category Clean"]
+        .apply(
+            lambda series:
+            (series == "P").all()
+        )
+        .reset_index(
+            name="Passed For Percentage"
+        )
+    )
+
+    percentage_summary = (
+        percentage_student_status
+        .groupby(
+            "Regulation",
+            dropna=False
+        )
+        .agg(
+            **{
+                "Percentage Eligible Students": (
+                    "Student ID",
+                    "nunique"
+                ),
+                "Percentage Passed Students": (
+                    "Passed For Percentage",
+                    "sum"
+                )
+            }
+        )
+        .reset_index()
+    )
+
+    # Existing student count / passed count remain unchanged
+    # for the first graph.
     summary = (
         student_status
         .groupby(
@@ -3576,20 +3644,29 @@ def build_regulation_summary(results_df):
                 "Passed Students": (
                     "Passed",
                     "sum"
-                ),
-                "Cleared All Backlogs": (
-                    "Cleared All Backlogs",
-                    "sum"
                 )
             }
         )
         .reset_index()
     )
 
+    summary = summary.merge(
+        percentage_summary,
+        on="Regulation",
+        how="left"
+    )
+
     summary["Pass Percentage"] = (
-        summary["Passed Students"]
-        / summary["Total Students"]
+        summary["Percentage Passed Students"]
+        / summary["Percentage Eligible Students"]
+        .replace(0, pd.NA)
         * 100
+    )
+
+    summary["Pass Percentage"] = (
+        summary["Pass Percentage"]
+        .fillna(0)
+        .astype(float)
     )
 
     regulation_order = [
@@ -3635,6 +3712,7 @@ def build_regulation_summary(results_df):
 def display_regulation_dashboard(results_df):
     """
     Display regulation-wise bar charts for Y-23, Y-24 and Y-25.
+    The pass-percentage chart ignores "-" category students.
     """
 
     summary = build_regulation_summary(
@@ -3729,7 +3807,8 @@ def display_regulation_dashboard(results_df):
                 Pass Percentage — Regulation Wise
             </div>
             <div class="dashboard-card-note">
-                Passed students as a percentage of total students in each regulation.
+                Passed students as a percentage of students with meaningful results;
+                "-" category is excluded from this calculation.
             </div>
         </div>
         """)
@@ -3772,60 +3851,6 @@ def display_regulation_dashboard(results_df):
                 "displayModeBar": False
             }
         )
-
-    # --------------------------------------------------------
-    # Chart 3: Students who cleared all backlogs
-    # --------------------------------------------------------
-
-    st.html("""
-    <div class="dashboard-card">
-        <div class="dashboard-card-title">
-            Students Who Cleared All Backlogs — Regulation Wise
-        </div>
-        <div class="dashboard-card-note">
-            Students who had a non-P result earlier but whose latest available
-            status is now P for all courses.
-        </div>
-    </div>
-    """)
-
-    fig_cleared = px.bar(
-        summary,
-        x="Regulation",
-        y="Cleared All Backlogs",
-        text="Cleared All Backlogs",
-        labels={
-            "Regulation": "Regulation",
-            "Cleared All Backlogs": "Number of Students"
-        }
-    )
-
-    fig_cleared.update_traces(
-        textposition="outside"
-    )
-
-    fig_cleared.update_layout(
-        height=330,
-        margin=dict(
-            l=20,
-            r=20,
-            t=20,
-            b=20
-        ),
-        showlegend=False,
-        yaxis=dict(
-            rangemode="tozero"
-        )
-    )
-
-    st.plotly_chart(
-        fig_cleared,
-        use_container_width=True,
-        config={
-            "displayModeBar": False
-        }
-    )
-
 
 # ============================================================
 # LOAD DATA
