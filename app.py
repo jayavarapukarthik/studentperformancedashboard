@@ -88,80 +88,131 @@ st.html("""
 
 /* ============================================================
    TOP 3 STUDENTS — REGULATION WISE
+   Compact three-column layout
    ============================================================ */
 
 .top3-card {
-    margin-top: 24px;
-    margin-bottom: 24px;
-    background: linear-gradient(135deg, #ffffff 0%, #f4f8fc 100%);
+    margin-top: 18px;
+    margin-bottom: 20px;
+    background: linear-gradient(
+        135deg,
+        #ffffff 0%,
+        #f4f8fc 100%
+    );
     border: 1px solid #d8e4ef;
-    border-left: 6px solid #123b68;
-    border-radius: 18px;
-    padding: 20px 22px 22px 22px;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+    border-left: 5px solid #123b68;
+    border-radius: 17px;
+    padding: 17px 18px 18px 18px;
+    box-shadow: 0 7px 20px rgba(15, 23, 42, 0.06);
 }
 
 .top3-title {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 850;
     color: #123b68;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
 }
 
 .top3-subtitle {
-    font-size: 13px;
+    font-size: 12px;
     color: #64748b;
-    margin-bottom: 16px;
+    margin-bottom: 13px;
 }
 
-.top3-table-wrap {
+.top3-regulation-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
     width: 100%;
-    overflow-x: auto;
-    border: 1px solid #dbe5ef;
-    border-radius: 14px;
 }
 
-.top3-table {
+.top3-regulation-card {
+    background: #ffffff;
+    border: 1px solid #d5e1ec;
+    border-radius: 13px;
+    overflow: hidden;
+    box-shadow: 0 4px 13px rgba(15, 23, 42, 0.05);
+}
+
+.top3-regulation-header {
+    background: linear-gradient(
+        135deg,
+        #123b68,
+        #1d6096
+    );
+    color: #ffffff;
+    text-align: center;
+    padding: 9px 8px;
+    font-size: 17px;
+    font-weight: 850;
+    letter-spacing: 0.4px;
+}
+
+.top3-regulation-subtitle {
+    text-align: center;
+    color: #64748b;
+    font-size: 10px;
+    padding: 6px 8px 5px 8px;
+    background: #f6f9fc;
+    border-bottom: 1px solid #e2eaf2;
+}
+
+.top3-mini-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
     background: #ffffff;
-    font-size: 14px;
 }
 
-.top3-table th {
-    background: #123b68;
-    color: #ffffff;
-    padding: 12px 14px;
+.top3-mini-table th {
+    background: #eef4f9;
+    color: #334155;
+    padding: 7px 6px;
     text-align: left;
-    font-weight: 800;
+    font-size: 10px;
+    font-weight: 850;
+    border-bottom: 1px solid #dbe5ef;
     white-space: nowrap;
 }
 
-.top3-table td {
-    padding: 11px 14px;
-    border-bottom: 1px solid #e6edf4;
+.top3-mini-table td {
+    padding: 8px 6px;
+    border-bottom: 1px solid #e7edf3;
     color: #334155;
-    font-weight: 600;
+    font-size: 10.5px;
+    font-weight: 650;
+    vertical-align: middle;
 }
 
-.top3-table tr:last-child td {
+.top3-mini-table tr:last-child td {
     border-bottom: none;
 }
 
-.top3-table .regulation-cell {
-    font-weight: 850;
-    color: #123b68;
+.top3-mini-table .rank-cell {
+    width: 14%;
+    font-weight: 900;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.top3-mini-table .id-cell {
+    width: 28%;
+    font-size: 9.5px;
     white-space: nowrap;
 }
 
-.top3-table .cgpa-cell {
-    font-size: 16px;
-    font-weight: 850;
-    color: #123b68;
+.top3-mini-table .name-cell {
+    width: 40%;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
 }
 
-.top3-table .rank-cell {
+.top3-mini-table .cgpa-cell {
+    width: 18%;
+    text-align: center;
+    font-size: 13px;
     font-weight: 900;
+    color: #123b68;
     white-space: nowrap;
 }
 
@@ -175,6 +226,13 @@ st.html("""
 
 .top3-rank-3 {
     color: #a0522d;
+}
+
+/* Stack only on narrower screens. */
+@media (max-width: 900px) {
+    .top3-regulation-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 
@@ -4413,10 +4471,8 @@ def display_top_students_by_regulation(
     mentor_df
 ):
     """
-    Display the top 3 students by CGPA for Y-23, Y-24 and Y-25.
-
-    Student identity and regulation come from the result data.
-    CGPA comes from CGPA.xlsx.
+    Display the top 3 students by CGPA for Y-23, Y-24 and Y-25
+    in three compact side-by-side regulation cards.
     """
 
     required_result_columns = [
@@ -4496,9 +4552,11 @@ def display_top_students_by_regulation(
         )
     )
 
-    # If result data does not contain a usable name, use the
-    # Mentor-Mentee data as a fallback.
-    if isinstance(mentor_df, pd.DataFrame) and not mentor_df.empty:
+    # Use Mentor-Mentee data as a fallback for names.
+    if (
+        isinstance(mentor_df, pd.DataFrame)
+        and not mentor_df.empty
+    ):
         mentor_required = [
             column
             for column in [
@@ -4509,6 +4567,7 @@ def display_top_students_by_regulation(
         ]
 
         if len(mentor_required) == 2:
+
             mentor_names = mentor_df[
                 mentor_required
             ].copy()
@@ -4650,53 +4709,104 @@ def display_top_students_by_regulation(
         + 1
     )
 
-    rows_html = []
+    # --------------------------------------------------------
+    # Build one compact card for each regulation.
+    # --------------------------------------------------------
 
-    for _, row in top_students.iterrows():
+    regulation_cards = []
 
-        rank = int(row["Rank"])
-        regulation = html.escape(
-            str(row["Regulation"])
+    for regulation in regulation_order:
+
+        regulation_students = (
+            top_students[
+                top_students["Regulation"] == regulation
+            ]
+            .sort_values("Rank")
         )
-        student_id = html.escape(
-            str(row["Student ID"])
-        )
-        student_name = html.escape(
-            str(row["Name"])
-            if str(row["Name"]).strip()
-            else "NOT AVAILABLE"
-        )
-        cgpa = f"{float(row['CGPA']):.2f}"
 
-        if rank == 1:
-            rank_class = "top3-rank-1"
-            rank_text = "🥇 1"
-        elif rank == 2:
-            rank_class = "top3-rank-2"
-            rank_text = "🥈 2"
-        else:
-            rank_class = "top3-rank-3"
-            rank_text = "🥉 3"
+        if regulation_students.empty:
+            continue
 
-        rows_html.append(
+        rows_html = []
+
+        for _, row in regulation_students.iterrows():
+
+            rank = int(row["Rank"])
+
+            student_id = html.escape(
+                str(row["Student ID"])
+            )
+
+            student_name = html.escape(
+                str(row["Name"])
+                if str(row["Name"]).strip()
+                else "NOT AVAILABLE"
+            )
+
+            cgpa = f"{float(row['CGPA']):.2f}"
+
+            if rank == 1:
+                rank_class = "top3-rank-1"
+                rank_text = "🥇 1"
+            elif rank == 2:
+                rank_class = "top3-rank-2"
+                rank_text = "🥈 2"
+            else:
+                rank_class = "top3-rank-3"
+                rank_text = "🥉 3"
+
+            rows_html.append(
+                f"""
+                <tr>
+                    <td class="rank-cell {rank_class}">
+                        {rank_text}
+                    </td>
+
+                    <td class="id-cell">
+                        {student_id}
+                    </td>
+
+                    <td class="name-cell">
+                        {student_name}
+                    </td>
+
+                    <td class="cgpa-cell">
+                        {cgpa}
+                    </td>
+                </tr>
+                """
+            )
+
+        regulation_cards.append(
             f"""
-            <tr>
-                <td class="rank-cell {rank_class}">
-                    {rank_text}
-                </td>
-                <td class="regulation-cell">
+            <div class="top3-regulation-card">
+
+                <div class="top3-regulation-header">
                     {regulation}
-                </td>
-                <td>
-                    {student_id}
-                </td>
-                <td>
-                    {student_name}
-                </td>
-                <td class="cgpa-cell">
-                    {cgpa}
-                </td>
-            </tr>
+                </div>
+
+                <div class="top3-regulation-subtitle">
+                    Top 3 performers by CGPA
+                </div>
+
+                <table class="top3-mini-table">
+
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>CGPA</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {"".join(rows_html)}
+                    </tbody>
+
+                </table>
+
+            </div>
             """
         )
 
@@ -4709,37 +4819,21 @@ def display_top_students_by_regulation(
             </div>
 
             <div class="top3-subtitle">
-                Top three students in Y-23, Y-24 and Y-25 based on CGPA.
+                Top three students in each regulation based on CGPA.
             </div>
 
-            <div class="top3-table-wrap">
-
-                <table class="top3-table">
-
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Regulation</th>
-                            <th>Student ID</th>
-                            <th>Student Name</th>
-                            <th>CGPA</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
+            <div class="top3-regulation-grid">
         """
-        + "".join(rows_html)
+        + "".join(regulation_cards)
         +
         """
-                    </tbody>
-
-                </table>
-
             </div>
 
         </div>
         """
     )
+
+
 
 
 # ============================================================
