@@ -87,6 +87,67 @@ st.html("""
 <style>
 
 /* ============================================================
+   LOGIN INPUTS — EQUAL HEIGHT / CONSISTENT APPEARANCE
+   ============================================================ */
+
+.login-form-card {
+    margin-top: 10px;
+}
+
+div[data-testid="stTextInput"] {
+    margin-bottom: 10px;
+}
+
+div[data-testid="stTextInput"] label {
+    font-size: 15px !important;
+    font-weight: 750 !important;
+    color: #243b53 !important;
+    margin-bottom: 5px !important;
+}
+
+div[data-testid="stTextInput"] input {
+    height: 52px !important;
+    min-height: 52px !important;
+    box-sizing: border-box !important;
+    border-radius: 12px !important;
+    border: 1.5px solid #c8d8e8 !important;
+    background: #ffffff !important;
+    padding: 0 15px !important;
+    font-size: 16px !important;
+    line-height: 52px !important;
+    color: #243b53 !important;
+}
+
+div[data-testid="stTextInput"] input:focus {
+    border-color: #1d6096 !important;
+    box-shadow: 0 0 0 2px rgba(29, 96, 150, 0.12) !important;
+}
+
+/* Password visibility control stays aligned with the same 52px field. */
+div[data-testid="stTextInput"] button {
+    min-height: 52px !important;
+    height: 52px !important;
+    border-radius: 0 12px 12px 0 !important;
+}
+
+.login-security-note {
+    min-height: 42px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid #d8e5f0;
+    border-radius: 12px;
+    background: #f7fafc;
+    color: #5d718b;
+    font-size: 12px;
+    font-weight: 650;
+    padding: 8px 12px;
+    margin-top: 12px;
+}
+
+/* ============================================================
    TOP 3 STUDENTS — REGULATION WISE
    Compact three-column layout
    ============================================================ */
@@ -102,7 +163,7 @@ st.html("""
     border: 1px solid #d8e4ef;
     border-left: 5px solid #123b68;
     border-radius: 17px;
-    padding: 17px 18px 18px 18px;
+    padding: 16px 17px 17px 17px;
     box-shadow: 0 7px 20px rgba(15, 23, 42, 0.06);
 }
 
@@ -116,13 +177,13 @@ st.html("""
 .top3-subtitle {
     font-size: 12px;
     color: #64748b;
-    margin-bottom: 13px;
+    margin-bottom: 12px;
 }
 
 .top3-regulation-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
+    gap: 13px;
     width: 100%;
 }
 
@@ -142,7 +203,7 @@ st.html("""
     );
     color: #ffffff;
     text-align: center;
-    padding: 9px 8px;
+    padding: 8px 7px;
     font-size: 17px;
     font-weight: 850;
     letter-spacing: 0.4px;
@@ -152,7 +213,7 @@ st.html("""
     text-align: center;
     color: #64748b;
     font-size: 10px;
-    padding: 6px 8px 5px 8px;
+    padding: 5px 7px;
     background: #f6f9fc;
     border-bottom: 1px solid #e2eaf2;
 }
@@ -167,8 +228,8 @@ st.html("""
 .top3-mini-table th {
     background: #eef4f9;
     color: #334155;
-    padding: 7px 6px;
-    text-align: left;
+    padding: 7px 5px;
+    text-align: center;
     font-size: 10px;
     font-weight: 850;
     border-bottom: 1px solid #dbe5ef;
@@ -176,12 +237,14 @@ st.html("""
 }
 
 .top3-mini-table td {
-    padding: 8px 6px;
+    padding: 8px 5px;
     border-bottom: 1px solid #e7edf3;
     color: #334155;
     font-size: 10.5px;
     font-weight: 650;
     vertical-align: middle;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .top3-mini-table tr:last-child td {
@@ -189,31 +252,20 @@ st.html("""
 }
 
 .top3-mini-table .rank-cell {
-    width: 14%;
+    width: 22%;
     font-weight: 900;
-    white-space: nowrap;
-    text-align: center;
 }
 
 .top3-mini-table .id-cell {
-    width: 28%;
+    width: 48%;
     font-size: 9.5px;
-    white-space: nowrap;
-}
-
-.top3-mini-table .name-cell {
-    width: 40%;
-    line-height: 1.2;
-    overflow-wrap: anywhere;
 }
 
 .top3-mini-table .cgpa-cell {
-    width: 18%;
-    text-align: center;
+    width: 30%;
     font-size: 13px;
     font-weight: 900;
     color: #123b68;
-    white-space: nowrap;
 }
 
 .top3-rank-1 {
@@ -228,7 +280,6 @@ st.html("""
     color: #a0522d;
 }
 
-/* Stack only on narrower screens. */
 @media (max-width: 900px) {
     .top3-regulation-grid {
         grid-template-columns: 1fr;
@@ -4473,6 +4524,8 @@ def display_top_students_by_regulation(
     """
     Display the top 3 students by CGPA for Y-23, Y-24 and Y-25
     in three compact side-by-side regulation cards.
+
+    Only Rank, Student ID and CGPA are displayed to optimize space.
     """
 
     required_result_columns = [
@@ -4500,13 +4553,8 @@ def display_top_students_by_regulation(
 
     student_master = results_df[
         [
-            column
-            for column in [
-                "Student ID",
-                "Regulation",
-                "Name"
-            ]
-            if column in results_df.columns
+            "Student ID",
+            "Regulation"
         ]
     ].copy()
 
@@ -4523,18 +4571,6 @@ def display_top_students_by_regulation(
         .str.upper()
     )
 
-    if "Name" in student_master.columns:
-        student_master["Name"] = (
-            student_master["Name"]
-            .fillna("")
-            .astype(str)
-            .str.strip()
-            .str.upper()
-        )
-    else:
-        student_master["Name"] = ""
-
-    # One row per student and regulation.
     student_master = (
         student_master
         .sort_values(
@@ -4551,69 +4587,6 @@ def display_top_students_by_regulation(
             keep="first"
         )
     )
-
-    # Use Mentor-Mentee data as a fallback for names.
-    if (
-        isinstance(mentor_df, pd.DataFrame)
-        and not mentor_df.empty
-    ):
-        mentor_required = [
-            column
-            for column in [
-                "Student ID",
-                "Student Name"
-            ]
-            if column in mentor_df.columns
-        ]
-
-        if len(mentor_required) == 2:
-
-            mentor_names = mentor_df[
-                mentor_required
-            ].copy()
-
-            mentor_names["Student ID"] = (
-                mentor_names["Student ID"]
-                .astype(str)
-                .str.strip()
-            )
-
-            mentor_names["Student Name"] = (
-                mentor_names["Student Name"]
-                .fillna("")
-                .astype(str)
-                .str.strip()
-                .str.upper()
-            )
-
-            mentor_names = (
-                mentor_names
-                .drop_duplicates(
-                    subset=["Student ID"],
-                    keep="first"
-                )
-                .rename(
-                    columns={
-                        "Student Name":
-                        "Mentor Name"
-                    }
-                )
-            )
-
-            student_master = student_master.merge(
-                mentor_names,
-                on="Student ID",
-                how="left"
-            )
-
-            student_master["Name"] = (
-                student_master["Name"]
-                .where(
-                    student_master["Name"].str.len() > 0,
-                    student_master["Mentor Name"]
-                )
-                .fillna("")
-            )
 
     cgpa_data = cgpa_df[
         [
@@ -4709,10 +4682,6 @@ def display_top_students_by_regulation(
         + 1
     )
 
-    # --------------------------------------------------------
-    # Build one compact card for each regulation.
-    # --------------------------------------------------------
-
     regulation_cards = []
 
     for regulation in regulation_order:
@@ -4737,12 +4706,6 @@ def display_top_students_by_regulation(
                 str(row["Student ID"])
             )
 
-            student_name = html.escape(
-                str(row["Name"])
-                if str(row["Name"]).strip()
-                else "NOT AVAILABLE"
-            )
-
             cgpa = f"{float(row['CGPA']):.2f}"
 
             if rank == 1:
@@ -4764,10 +4727,6 @@ def display_top_students_by_regulation(
 
                     <td class="id-cell">
                         {student_id}
-                    </td>
-
-                    <td class="name-cell">
-                        {student_name}
                     </td>
 
                     <td class="cgpa-cell">
@@ -4795,7 +4754,6 @@ def display_top_students_by_regulation(
                         <tr>
                             <th>Rank</th>
                             <th>Student ID</th>
-                            <th>Name</th>
                             <th>CGPA</th>
                         </tr>
                     </thead>
