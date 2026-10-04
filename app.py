@@ -180,14 +180,14 @@ st.html("""
 }
 
 .dashboard-title {
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 850;
     color: #123b68;
     margin-bottom: 4px;
 }
 
 .dashboard-subtitle {
-    font-size: 14px;
+    font-size: 16px;
     color: #64748b;
     margin-bottom: 14px;
 }
@@ -196,22 +196,26 @@ st.html("""
     background: linear-gradient(135deg, #ffffff 0%, #f5f9fd 100%);
     border: 1px solid #dbe5ef;
     border-radius: 17px;
-    padding: 16px 18px 10px 18px;
+    padding: 18px 20px 14px 20px;
     box-shadow: 0 7px 22px rgba(15, 23, 42, 0.06);
-    height: 100%;
+    min-height: 118px;
+    height: 118px;
+    box-sizing: border-box;
 }
 
 .dashboard-card-title {
-    font-size: 16px;
-    font-weight: 800;
+    font-size: 20px;
+    font-weight: 850;
     color: #123b68;
-    margin-bottom: 2px;
+    margin-bottom: 6px;
+    line-height: 1.25;
 }
 
 .dashboard-card-note {
-    font-size: 12px;
+    font-size: 14px;
     color: #64748b;
     margin-bottom: 5px;
+    line-height: 1.45;
 }
 
 
@@ -4212,19 +4216,28 @@ def display_regulation_dashboard(results_df):
 
         fig_passed.update_traces(
             textposition="outside",
-            cliponaxis=False
+            cliponaxis=False,
+            textfont=dict(size=16)
         )
 
         fig_passed.update_layout(
-            height=390,
+            height=430,
             margin=dict(
-                l=25,
-                r=25,
-                t=20,
-                b=30
+                l=55,
+                r=35,
+                t=35,
+                b=55
             ),
             showlegend=False,
+            font=dict(
+                size=15
+            ),
             xaxis=dict(
+                title=dict(
+                    text="Regulation",
+                    font=dict(size=17)
+                ),
+                tickfont=dict(size=15),
                 categoryorder="array",
                 categoryarray=[
                     "Y-23",
@@ -4233,7 +4246,11 @@ def display_regulation_dashboard(results_df):
                 ]
             ),
             yaxis=dict(
-                title="Number of Students",
+                title=dict(
+                    text="Number of Students",
+                    font=dict(size=17)
+                ),
+                tickfont=dict(size=15),
                 rangemode="tozero"
             )
         )
@@ -4277,21 +4294,43 @@ def display_regulation_dashboard(results_df):
 
         fig_percentage.update_traces(
             texttemplate="%{text:.1f}%",
-            textposition="outside"
+            textposition="outside",
+            textfont=dict(size=16)
         )
 
         fig_percentage.update_layout(
-            height=330,
+            height=430,
             margin=dict(
-                l=20,
-                r=20,
-                t=20,
-                b=20
+                l=55,
+                r=35,
+                t=35,
+                b=55
             ),
             showlegend=False,
+            font=dict(
+                size=15
+            ),
+            xaxis=dict(
+                title=dict(
+                    text="Regulation",
+                    font=dict(size=17)
+                ),
+                tickfont=dict(size=15),
+                categoryorder="array",
+                categoryarray=[
+                    "Y-23",
+                    "Y-24",
+                    "Y-25"
+                ]
+            ),
             yaxis=dict(
+                title=dict(
+                    text="Pass Percentage (%)",
+                    font=dict(size=17)
+                ),
                 range=[0, 100],
-                ticksuffix="%"
+                ticksuffix="%",
+                tickfont=dict(size=15)
             )
         )
 
