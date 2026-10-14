@@ -1450,16 +1450,17 @@ div[data-testid="stForm"] {
 div[data-testid="stForm"] label {
     color: #243b53 !important;
     font-weight: 800 !important;
-    font-size: 12px !important;
+    font-size: 22px !important;
 }
 
 div[data-testid="stForm"] input {
-    border-radius: 9px !important;
+    border-radius: 12px !important;
     border: 1px solid #c7d7e6 !important;
     background: #f8fbfe !important;
-    min-height: 39px !important;
-    font-size: 13px !important;
-    padding-left: 12px !important;
+    min-height: 54px !important;
+    height: 54px !important;
+    font-size: 20px !important;
+    padding-left: 16px !important;
 }
 
 div[data-testid="stForm"] input:hover {
@@ -1787,27 +1788,27 @@ def render_login_page():
 
         div[data-testid="stForm"] label {{
             color: #083d78 !important;
-            font-size: 18px !important;
+            font-size: 22px !important;
             font-weight: 850 !important;
-            margin-bottom: 4px !important;
+            margin-bottom: 6px !important;
         }}
 
         div[data-testid="stForm"] input {{
-            height: 45px !important;
-            min-height: 45px !important;
+            height: 54px !important;
+            min-height: 54px !important;
             border-radius: 12px !important;
             border: 1.5px solid #c9dced !important;
             background: rgba(255, 255, 255, 0.98) !important;
             color: #17395f !important;
-            font-size: 18px !important;
+            font-size: 20px !important;
             font-weight: 600 !important;
-            padding-left: 14px !important;
+            padding: 0 16px !important;
             box-shadow: 0 2px 8px rgba(22, 79, 130, 0.05) !important;
         }}
 
         div[data-testid="stForm"] input::placeholder {{
             color: #7c8797 !important;
-            font-size: 18px !important;
+            font-size: 19px !important;
             font-weight: 500 !important;
             opacity: 1 !important;
         }}
@@ -1819,8 +1820,8 @@ def render_login_page():
         }}
 
         div[data-testid="stForm"] button {{
-            min-height: 45px !important;
-            height: 45px !important;
+            min-height: 52px !important;
+            height: 52px !important;
             border: none !important;
             border-radius: 12px !important;
             background:
@@ -1885,11 +1886,13 @@ def render_login_page():
             }}
 
             div[data-testid="stForm"] label {{
-                font-size: 17px !important;
+                font-size: 20px !important;
             }}
 
             div[data-testid="stForm"] input {{
-                font-size: 18px !important;
+                font-size: 19px !important;
+                min-height: 52px !important;
+                height: 52px !important;
             }}
         }}
 
