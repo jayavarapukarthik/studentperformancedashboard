@@ -5002,62 +5002,148 @@ def display_top_students_by_regulation(
 
 
 # ============================================================
-# Y-26 M.TECH CSE — TRIMESTER-1 ATTENDANCE SEARCH
+# Y-26 M.TECH CSE — TRIMESTER-1 ATTENDANCE PAGE
 # ============================================================
 
-st.markdown(
-    """
-    <style>
-    .attendance-module-title {
-        color: #123b68;
-        font-size: 25px;
-        font-weight: 850;
-        margin: 12px 0 6px 0;
-    }
-    .attendance-module-subtitle {
-        color: #64748b;
-        font-size: 15px;
-        margin-bottom: 14px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+def render_y26_trimester1_attendance_page():
+    """Render the dedicated Y-26 M.Tech CSE Trimester-1 attendance page."""
 
-if "show_y26_trimester1_attendance" not in st.session_state:
-    st.session_state["show_y26_trimester1_attendance"] = False
-
-attendance_button_col, attendance_spacer_col = st.columns([2.4, 7.6])
-
-with attendance_button_col:
-    if st.button(
-        "📋 Y-26-CSE-Trimester-1",
-        key="open_y26_trimester1_attendance",
-        use_container_width=True
-    ):
-        st.session_state["show_y26_trimester1_attendance"] = (
-            not st.session_state["show_y26_trimester1_attendance"]
-        )
-
-if st.session_state["show_y26_trimester1_attendance"]:
     st.markdown(
-        '<div class="attendance-module-title">Y-26 M.Tech CSE — Trimester-1 Attendance Percentage</div>'
-        '<div class="attendance-module-subtitle">Enter a student ID to view the student\'s attendance percentage course-wise.</div>',
+        """
+        <style>
+        .attendance-page-card {
+            background: linear-gradient(135deg, #ffffff 0%, #edf6ff 100%);
+            border: 1px solid #cfe0f2;
+            border-top: 6px solid #17649a;
+            border-radius: 22px;
+            padding: 25px 30px;
+            margin: 12px 0 22px 0;
+            box-shadow: 0 12px 30px rgba(18, 59, 104, 0.10);
+        }
+        .attendance-page-title {
+            color: #123b68;
+            font-size: 30px;
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+        .attendance-page-subtitle {
+            color: #526985;
+            font-size: 17px;
+            line-height: 1.55;
+        }
+        .attendance-search-label {
+            color: #123b68;
+            font-size: 19px;
+            font-weight: 800;
+            margin: 8px 0 6px 0;
+        }
+        .attendance-table-wrap {
+            border: 1px solid #cddded;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 22px rgba(18, 59, 104, 0.08);
+            margin-top: 16px;
+        }
+        .attendance-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 17px;
+            color: #25364b;
+            background: white;
+        }
+        .attendance-table th {
+            background: linear-gradient(100deg, #123b68, #17649a);
+            color: white;
+            text-align: left;
+            padding: 15px 17px;
+            font-weight: 800;
+            border-right: 1px solid rgba(255,255,255,.25);
+        }
+        .attendance-table td {
+            padding: 14px 17px;
+            border-bottom: 1px solid #dbe6f1;
+            vertical-align: middle;
+            font-weight: 550;
+        }
+        .attendance-table tr:nth-child(even) td {
+            background: #f3f8fd;
+        }
+        .attendance-table tr:last-child td {
+            border-bottom: none;
+        }
+        .attendance-percent {
+            color: #123b68;
+            font-size: 19px;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+        .attendance-result-note {
+            background: #eaf5ff;
+            color: #17456f;
+            border: 1px solid #cfe4f7;
+            border-radius: 12px;
+            padding: 13px 16px;
+            font-size: 16px;
+            font-weight: 700;
+            margin: 14px 0;
+        }
+        div[data-testid="stButton"] button,
+        div[data-testid="stFormSubmitButton"] button {
+            min-height: 48px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 800;
+        }
+        div[data-testid="stTextInput"] input {
+            min-height: 48px;
+            font-size: 19px !important;
+            border-radius: 11px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    back_col, _ = st.columns([1.8, 7.2])
+    with back_col:
+        if st.button(
+            "← Back to Dashboard",
+            key="y26_attendance_back_to_dashboard",
+            use_container_width=True
+        ):
+            st.session_state["portal_page"] = "dashboard"
+            st.rerun()
+
+    st.markdown(
+        """
+        <div class="attendance-page-card">
+            <div class="attendance-page-title">
+                📋 Y-26 M.Tech CSE — Trimester-1 Attendance
+            </div>
+            <div class="attendance-page-subtitle">
+                Search using the student's University ID to view course-wise
+                attendance percentages for Trimester-1.
+            </div>
+        </div>
+        """,
         unsafe_allow_html=True
     )
 
     with st.form("y26_trimester1_attendance_search_form"):
-        attendance_search_col, attendance_submit_col = st.columns(
-            [5, 1],
-            vertical_alignment="bottom"
+        st.markdown(
+            '<div class="attendance-search-label">Student University ID</div>',
+            unsafe_allow_html=True
         )
-        with attendance_search_col:
+        search_col, submit_col = st.columns([5.5, 1.5], vertical_alignment="bottom")
+        with search_col:
             attendance_student_id = st.text_input(
-                "Student ID",
+                "Student University ID",
                 placeholder="Enter Student ID (e.g., 2601050001)",
+                label_visibility="collapsed",
                 key="y26_trimester1_attendance_student_id"
             ).strip()
-        with attendance_submit_col:
+        with submit_col:
             attendance_search_clicked = st.form_submit_button(
                 "🔍 Search Attendance",
                 use_container_width=True
@@ -5065,7 +5151,7 @@ if st.session_state["show_y26_trimester1_attendance"]:
 
     if attendance_search_clicked:
         if not attendance_student_id:
-            st.warning("Please enter a Student ID to search attendance.")
+            st.warning("Please enter a Student University ID to search attendance.")
         elif not Y26_TRIMESTER1_ATTENDANCE_FILE.exists():
             st.error(
                 "Attendance workbook not found. Please add "
@@ -5078,90 +5164,106 @@ if st.session_state["show_y26_trimester1_attendance"]:
                     Y26_TRIMESTER1_ATTENDANCE_FILE,
                     dtype={"Stu ID": str}
                 )
+                attendance_source_df.columns = [
+                    str(column).strip() for column in attendance_source_df.columns
+                ]
 
                 if "Stu ID" not in attendance_source_df.columns:
                     st.error(
                         "The attendance workbook must contain a 'Stu ID' column."
                     )
-                else:
-                    attendance_source_df["Stu ID"] = (
-                        attendance_source_df["Stu ID"]
-                        .astype(str)
-                        .str.strip()
-                        .str.replace(r"\.0$", "", regex=True)
+                    return
+
+                attendance_source_df["Stu ID"] = (
+                    attendance_source_df["Stu ID"]
+                    .astype(str)
+                    .str.strip()
+                    .str.replace(r"\.0$", "", regex=True)
+                )
+                student_id_clean = re.sub(r"\.0$", "", attendance_student_id.strip())
+                matching_attendance = attendance_source_df[
+                    attendance_source_df["Stu ID"] == student_id_clean
+                ]
+
+                if matching_attendance.empty:
+                    st.warning(
+                        f"No Trimester-1 attendance record found for Student ID "
+                        f"{html.escape(student_id_clean)}."
                     )
-                    matching_attendance = attendance_source_df[
-                        attendance_source_df["Stu ID"] == attendance_student_id
-                    ]
+                else:
+                    student_attendance_row = matching_attendance.iloc[0]
+                    attendance_records = []
 
-                    if matching_attendance.empty:
-                        st.warning(
-                            f"No Trimester-1 attendance record found for Student ID "
-                            f"{attendance_student_id}."
-                        )
-                    else:
-                        student_attendance_row = matching_attendance.iloc[0]
-                        attendance_records = []
+                    for column_name in attendance_source_df.columns:
+                        if column_name == "Stu ID":
+                            continue
 
-                        for column_name in attendance_source_df.columns:
-                            if column_name == "Stu ID":
-                                continue
+                        header_text = str(column_name).strip()
+                        if "-" in header_text:
+                            course_code, course_title = header_text.split("-", 1)
+                        else:
+                            course_code, course_title = header_text, header_text
 
-                            header_text = str(column_name).strip()
-                            if "-" in header_text:
-                                course_code, course_title = header_text.split("-", 1)
-                            else:
-                                course_code, course_title = header_text, header_text
-
-                            raw_value = student_attendance_row[column_name]
-                            if pd.isna(raw_value) or str(raw_value).strip() == "":
-                                attendance_display = "N/A"
-                            else:
-                                try:
-                                    numeric_value = float(raw_value)
-                                    # The supplied workbook stores attendance as values
-                                    # such as 25, 44, and 100, so display them as percentages.
-                                    attendance_display = (
-                                        f"{numeric_value:.2f}".rstrip("0").rstrip(".") + "%"
-                                    )
-                                except (TypeError, ValueError):
-                                    attendance_display = str(raw_value).strip()
-                                    if not attendance_display.endswith("%"):
-                                        attendance_display += "%"
-
-                            attendance_records.append({
-                                "S.No": len(attendance_records) + 1,
-                                "Course Code": course_code.strip(),
-                                "Course Title": course_title.strip(),
-                                "Attendance Percentage": attendance_display
-                            })
-
-                        st.success(
-                            f"Attendance details found for Student ID {attendance_student_id}."
-                        )
-                        st.dataframe(
-                            pd.DataFrame(attendance_records),
-                            use_container_width=True,
-                            hide_index=True,
-                            column_config={
-                                "S.No": st.column_config.NumberColumn(
-                                    "S.No",
-                                    width="small"
-                                ),
-                                "Course Code": st.column_config.TextColumn(
-                                    "Course Code",
-                                    width="medium"
-                                ),
-                                "Course Title": st.column_config.TextColumn(
-                                    "Course Title",
-                                    width="large"
-                                ),
-                                "Attendance Percentage": st.column_config.TextColumn(
-                                    "Attendance Percentage",
-                                    width="medium"
+                        raw_value = student_attendance_row[column_name]
+                        if pd.isna(raw_value) or str(raw_value).strip() == "":
+                            attendance_display = "N/A"
+                        else:
+                            try:
+                                numeric_value = float(raw_value)
+                                attendance_display = (
+                                    f"{numeric_value:.2f}".rstrip("0").rstrip(".") + "%"
                                 )
-                            }
+                            except (TypeError, ValueError):
+                                attendance_display = str(raw_value).strip()
+                                if not attendance_display.endswith("%"):
+                                    attendance_display += "%"
+
+                        attendance_records.append({
+                            "S.No": len(attendance_records) + 1,
+                            "Course Code": course_code.strip(),
+                            "Course Title": course_title.strip(),
+                            "Attendance Percentage": attendance_display
+                        })
+
+                    st.markdown(
+                        f'<div class="attendance-result-note">✓ Attendance details found for '
+                        f'Student ID: {html.escape(student_id_clean)} '
+                        f'&nbsp; • &nbsp; Total courses: {len(attendance_records)}</div>',
+                        unsafe_allow_html=True
+                    )
+
+                    table_rows = []
+                    for record in attendance_records:
+                        table_rows.append(
+                            "<tr>"
+                            f"<td>{record['S.No']}</td>"
+                            f"<td>{html.escape(record['Course Code'])}</td>"
+                            f"<td>{html.escape(record['Course Title'])}</td>"
+                            f"<td><span class='attendance-percent'>"
+                            f"{html.escape(record['Attendance Percentage'])}</span></td>"
+                            "</tr>"
                         )
+
+                    table_html = (
+                        '<div class="attendance-table-wrap"><table class="attendance-table">'
+                        "<thead><tr><th style='width:9%'>S.No</th>"
+                        "<th style='width:20%'>Course Code</th>"
+                        "<th>Course Title</th>"
+                        "<th style='width:23%'>Attendance Percentage</th></tr></thead>"
+                        "<tbody>" + "".join(table_rows) + "</tbody></table></div>"
+                    )
+                    st.markdown(table_html, unsafe_allow_html=True)
+
+                    # Also provide a clean CSV export for faculty use.
+                    export_df = pd.DataFrame(attendance_records)
+                    st.download_button(
+                        "⬇️ Download Attendance Details (CSV)",
+                        data=export_df.to_csv(index=False).encode("utf-8-sig"),
+                        file_name=f"{student_id_clean}_Trimester1_Attendance.csv",
+                        mime="text/csv",
+                        use_container_width=False
+                    )
+
             except Exception as attendance_error:
                 st.error(
                     "Unable to read the Y-26 Trimester-1 attendance workbook. "
@@ -5476,6 +5578,97 @@ with logout_right:
 
         st.rerun()
 
+
+
+# ============================================================
+# DASHBOARD QUICK ACTION — Y-26 TRIMESTER-1 ATTENDANCE
+# ============================================================
+
+if "portal_page" not in st.session_state:
+    st.session_state["portal_page"] = "dashboard"
+
+if st.session_state["portal_page"] == "dashboard":
+    st.markdown(
+        """
+        <style>
+        .quick-attendance-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 24px;
+            margin: 8px 0 26px 0;
+            border-radius: 20px;
+            border: 1px solid #cfe0f2;
+            background: linear-gradient(115deg, #ffffff 0%, #eef7ff 60%, #e3f1ff 100%);
+            box-shadow: 0 10px 28px rgba(18, 59, 104, 0.09);
+        }
+        .quick-attendance-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #123b68, #1387c5);
+            color: white;
+            font-size: 32px;
+            box-shadow: 0 7px 15px rgba(18, 59, 104, 0.18);
+        }
+        .quick-attendance-title {
+            color: #123b68;
+            font-size: 23px;
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+        .quick-attendance-subtitle {
+            color: #5a6f88;
+            font-size: 15px;
+            line-height: 1.45;
+        }
+        div[data-testid="stButton"] button[kind="primary"] {
+            background: linear-gradient(110deg, #123b68, #087fc1) !important;
+            color: white !important;
+            border: 0 !important;
+            border-radius: 13px !important;
+            min-height: 54px !important;
+            font-size: 17px !important;
+            font-weight: 850 !important;
+            box-shadow: 0 7px 18px rgba(18, 59, 104, 0.18) !important;
+        }
+        div[data-testid="stButton"] button[kind="primary"]:hover {
+            background: linear-gradient(110deg, #0c2f54, #0669a3) !important;
+            border: 0 !important;
+            transform: translateY(-1px);
+        }
+        </style>
+        <div class="quick-attendance-card">
+            <div class="quick-attendance-icon">📋</div>
+            <div>
+                <div class="quick-attendance-title">Y-26 M.Tech CSE — Trimester-1 Attendance</div>
+                <div class="quick-attendance-subtitle">
+                    Open the dedicated attendance page to search by student ID and view
+                    course-wise attendance percentages in a clear, readable table.
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    attendance_nav_col, _ = st.columns([2.6, 7.4])
+    with attendance_nav_col:
+        if st.button(
+            "📋  Y-26-CSE-Trimester-1  →",
+            key="navigate_to_y26_trimester1_attendance",
+            type="primary",
+            use_container_width=True
+        ):
+            st.session_state["portal_page"] = "attendance"
+            st.rerun()
+
+elif st.session_state["portal_page"] == "attendance":
+    render_y26_trimester1_attendance_page()
+    st.stop()
 
 
 # ============================================================
