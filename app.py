@@ -5108,7 +5108,7 @@ def render_y26_trimester1_attendance_page():
     back_col, _ = st.columns([1.8, 7.2])
     with back_col:
         if st.button(
-            "← Back to Dashboard",
+            "← Back to M.Tech Dashboard",
             key="y26_attendance_back_to_dashboard",
             use_container_width=True
         ):
@@ -5774,1278 +5774,1024 @@ with logout_right:
         st.session_state[
             "authenticated_username"
         ] = ""
+        st.session_state["program_section"] = "select"
+        st.session_state["portal_page"] = "dashboard"
 
         st.rerun()
 
 
 
 # ============================================================
-# DASHBOARD QUICK ACTION — Y-26 TRIMESTER-1 ATTENDANCE
+# POST-LOGIN PROGRAM SELECTION: B.TECH / M.TECH
 # ============================================================
+
+if "program_section" not in st.session_state:
+    st.session_state["program_section"] = "select"
 
 if "portal_page" not in st.session_state:
     st.session_state["portal_page"] = "dashboard"
 
-if st.session_state["portal_page"] == "dashboard":
+if st.session_state["program_section"] == "select":
     st.markdown(
         """
         <style>
-        .quick-attendance-card {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding: 20px 24px;
-            margin: 8px 0 26px 0;
-            border-radius: 20px;
-            border: 1px solid #cfe0f2;
-            background: linear-gradient(115deg, #ffffff 0%, #eef7ff 60%, #e3f1ff 100%);
-            box-shadow: 0 10px 28px rgba(18, 59, 104, 0.09);
+        .program-choice-wrap {
+            max-width: 1120px;
+            margin: 34px auto 24px auto;
+            padding: 30px;
+            border-radius: 26px;
+            border: 1px solid #d4e5f7;
+            background: linear-gradient(135deg, #ffffff 0%, #eef7ff 55%, #e4f2ff 100%);
+            box-shadow: 0 18px 45px rgba(18, 59, 104, .12);
+            text-align: center;
         }
-        .quick-attendance-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex: 0 0 64px;
-            height: 64px;
-            border-radius: 18px;
-            background: linear-gradient(135deg, #123b68, #1387c5);
-            color: white;
-            font-size: 32px;
-            box-shadow: 0 7px 15px rgba(18, 59, 104, 0.18);
-        }
-        .quick-attendance-title {
+        .program-choice-title {
             color: #123b68;
-            font-size: 23px;
+            font-size: 30px;
             font-weight: 900;
-            margin-bottom: 4px;
+            margin-bottom: 8px;
         }
-        .quick-attendance-subtitle {
-            color: #5a6f88;
-            font-size: 15px;
-            line-height: 1.45;
+        .program-choice-subtitle {
+            color: #5d718a;
+            font-size: 17px;
+            margin-bottom: 24px;
+        }
+        .program-card-note {
+            color: #60758d;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 6px;
         }
         div[data-testid="stButton"] button[kind="primary"] {
-            background: linear-gradient(110deg, #123b68, #087fc1) !important;
-            color: white !important;
-            border: 0 !important;
-            border-radius: 13px !important;
-            min-height: 54px !important;
-            font-size: 17px !important;
-            font-weight: 850 !important;
-            box-shadow: 0 7px 18px rgba(18, 59, 104, 0.18) !important;
+            min-height: 78px !important;
+            border-radius: 17px !important;
+            border: 1px solid rgba(255,255,255,.55) !important;
+            background: linear-gradient(115deg, #123b68, #087fc1) !important;
+            color: #ffffff !important;
+            font-size: 23px !important;
+            font-weight: 900 !important;
+            box-shadow: 0 10px 24px rgba(18,59,104,.18) !important;
         }
         div[data-testid="stButton"] button[kind="primary"]:hover {
-            background: linear-gradient(110deg, #0c2f54, #0669a3) !important;
-            border: 0 !important;
-            transform: translateY(-1px);
+            background: linear-gradient(115deg, #0b2e52, #056da8) !important;
+            transform: translateY(-2px);
+        }
+        div[data-testid="stButton"] button[kind="secondary"] {
+            min-height: 78px !important;
+            border-radius: 17px !important;
+            border: 1px solid #b9d4ed !important;
+            background: linear-gradient(115deg, #ffffff, #f0f8ff) !important;
+            color: #123b68 !important;
+            font-size: 23px !important;
+            font-weight: 900 !important;
+            box-shadow: 0 10px 24px rgba(18,59,104,.10) !important;
+        }
+        div[data-testid="stButton"] button[kind="secondary"]:hover {
+            border-color: #087fc1 !important;
+            background: #e7f4ff !important;
+            transform: translateY(-2px);
         }
         </style>
-        <div class="quick-attendance-card">
-            <div class="quick-attendance-icon">📋</div>
-            <div>
-                <div class="quick-attendance-title">Y-26 M.Tech CSE — Trimester-1 Attendance</div>
-                <div class="quick-attendance-subtitle">
-                    Open the dedicated attendance page to search by student ID and view
-                    course-wise attendance percentages in a clear, readable table.
-                </div>
+        <div class="program-choice-wrap">
+            <div class="program-choice-title">🎓 SELECT YOUR ACADEMIC PROGRAM</div>
+            <div class="program-choice-subtitle">
+                Choose B.Tech or M.Tech to open the relevant academic dashboard.
             </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    attendance_nav_col, _ = st.columns([2.6, 7.4])
-    with attendance_nav_col:
-        if st.button(
-            "📋  Y-26-CSE-Trimester-1  →",
-            key="navigate_to_y26_trimester1_attendance",
-            type="primary",
-            use_container_width=True
-        ):
+    btech_col, mtech_col = st.columns(2, gap="large")
+    with btech_col:
+        if st.button("🎓  B.TECH DASHBOARD  →", key="choose_btech_program", type="primary", use_container_width=True):
+            st.session_state["program_section"] = "B.Tech"
+            st.session_state["portal_page"] = "dashboard"
+            st.rerun()
+        st.markdown('<div class="program-card-note">Y-23, Y-24 and Y-25 • Academic performance, CGPA and student reports</div>', unsafe_allow_html=True)
+
+    with mtech_col:
+        if st.button("📘  M.TECH DASHBOARD  →", key="choose_mtech_program", type="secondary", use_container_width=True):
+            st.session_state["program_section"] = "M.Tech"
+            st.session_state["portal_page"] = "dashboard"
+            st.rerun()
+        st.markdown('<div class="program-card-note">M.Tech academic information and Y-26 Trimester-1 attendance</div>', unsafe_allow_html=True)
+
+    st.stop()
+
+elif st.session_state["program_section"] == "M.Tech":
+    if st.session_state.get("portal_page", "dashboard") == "attendance":
+        render_y26_trimester1_attendance_page()
+        st.stop()
+
+    st.markdown(
+        """
+        <div style="max-width:1120px;margin:30px auto 24px auto;padding:26px 30px;
+        border:1px solid #cfe0f2;border-top:6px solid #087fc1;border-radius:22px;
+        background:linear-gradient(120deg,#ffffff,#edf7ff);
+        box-shadow:0 12px 32px rgba(18,59,104,.10);">
+          <div style="font-size:29px;font-weight:900;color:#123b68;">📘 M.TECH ACADEMIC PORTAL</div>
+          <div style="font-size:16px;color:#5a6f88;margin-top:8px;">
+            Access M.Tech academic information and trimester-wise attendance.
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    mtech_action_col, _ = st.columns([3, 7])
+    with mtech_action_col:
+        if st.button("📋  Y-26 CSE — TRIMESTER-1 ATTENDANCE  →", key="open_mtech_attendance", type="primary", use_container_width=True):
             st.session_state["portal_page"] = "attendance"
             st.rerun()
 
-elif st.session_state["portal_page"] == "attendance":
-    render_y26_trimester1_attendance_page()
     st.stop()
 
+# B.Tech selected: show the complete existing B.Tech dashboard below.
 
-# ============================================================
-# REGULATION-WISE PERFORMANCE DASHBOARD
-# ============================================================
+if st.session_state["program_section"] == "B.Tech":
+    # ============================================================
+    # REGULATION-WISE PERFORMANCE DASHBOARD
+    # ============================================================
 
-display_regulation_dashboard(
-    results_df
-)
-
-
-
-# ============================================================
-# TOP 3 STUDENTS — REGULATION WISE
-# ============================================================
-
-display_top_students_by_regulation(
-    results_df,
-    cgpa_df,
-    mentor_df
-)
-
-
-# ============================================================
-# SEARCH CARD
-# ============================================================
-
-st.html("""
-<div class="search-card">
-
-    <div class="search-title">
-        🔎 SEARCH STUDENT ACADEMIC DETAILS
-    </div>
-
-    <div class="search-subtitle">
-        Enter the student's University ID to view
-        academic performance and counselling details.
-    </div>
-
-</div>
-""")
-
-
-# ============================================================
-# SEARCH FORM
-# ============================================================
-
-with st.form(
-    "student_search_form"
-):
-
-    col1, col2 = st.columns(
-        [5, 1],
-        vertical_alignment="bottom"
+    display_regulation_dashboard(
+        results_df
     )
 
-    with col1:
-
-        student_id = st.text_input(
-            "Student ID",
-            placeholder="Enter University ID",
-            label_visibility="collapsed"
-        )
-
-    with col2:
-
-        search_clicked = st.form_submit_button(
-            "🔍 Search",
-            use_container_width=True
-        )
 
 
-# ============================================================
-# SEARCH
-# ============================================================
+    # ============================================================
+    # TOP 3 STUDENTS — REGULATION WISE
+    # ============================================================
 
-if search_clicked:
-
-    student_id = (
-        student_id
-        .strip()
+    display_top_students_by_regulation(
+        results_df,
+        cgpa_df,
+        mentor_df
     )
 
-    if not student_id:
 
-        st.warning(
-            "Please enter a Student ID before searching."
+    # ============================================================
+    # SEARCH CARD
+    # ============================================================
+
+    st.html("""
+    <div class="search-card">
+
+        <div class="search-title">
+            🔎 SEARCH STUDENT ACADEMIC DETAILS
+        </div>
+
+        <div class="search-subtitle">
+            Enter the student's University ID to view
+            academic performance and counselling details.
+        </div>
+
+    </div>
+    """)
+
+
+    # ============================================================
+    # SEARCH FORM
+    # ============================================================
+
+    with st.form(
+        "student_search_form"
+    ):
+
+        col1, col2 = st.columns(
+            [5, 1],
+            vertical_alignment="bottom"
         )
 
-    else:
+        with col1:
 
-        # ====================================================
-        # FIND IN-SEM DATA
-        # ====================================================
+            student_id = st.text_input(
+                "Student ID",
+                placeholder="Enter University ID",
+                label_visibility="collapsed"
+            )
 
-        student_data = insem_df[
-            insem_df[
-                "University Id"
-            ] == student_id
-        ].copy()
+        with col2:
+
+            search_clicked = st.form_submit_button(
+                "🔍 Search",
+                use_container_width=True
+            )
 
 
-        # ====================================================
-        # FIND MENTOR DATA
-        # ====================================================
+    # ============================================================
+    # SEARCH
+    # ============================================================
 
-        if "Student ID" in mentor_df.columns:
+    if search_clicked:
 
-            mentor_data = mentor_df[
-                mentor_df[
+        student_id = (
+            student_id
+            .strip()
+        )
+
+        if not student_id:
+
+            st.warning(
+                "Please enter a Student ID before searching."
+            )
+
+        else:
+
+            # ====================================================
+            # FIND IN-SEM DATA
+            # ====================================================
+
+            student_data = insem_df[
+                insem_df[
+                    "University Id"
+                ] == student_id
+            ].copy()
+
+
+            # ====================================================
+            # FIND MENTOR DATA
+            # ====================================================
+
+            if "Student ID" in mentor_df.columns:
+
+                mentor_data = mentor_df[
+                    mentor_df[
+                        "Student ID"
+                    ] == student_id
+                ].copy()
+
+            else:
+
+                mentor_data = pd.DataFrame()
+
+
+            # ====================================================
+            # FIND RESULT DATA
+            # ====================================================
+
+            result_data = results_df[
+                results_df[
                     "Student ID"
                 ] == student_id
             ].copy()
 
-        else:
 
-            mentor_data = pd.DataFrame()
+            # ====================================================
+            # FIND CGPA DATA
+            # ====================================================
 
-
-        # ====================================================
-        # FIND RESULT DATA
-        # ====================================================
-
-        result_data = results_df[
-            results_df[
-                "Student ID"
-            ] == student_id
-        ].copy()
+            cgpa_data = cgpa_df[
+                cgpa_df[
+                    "Student ID"
+                ] == student_id
+            ].copy()
 
 
-        # ====================================================
-        # FIND CGPA DATA
-        # ====================================================
-
-        cgpa_data = cgpa_df[
-            cgpa_df[
-                "Student ID"
-            ] == student_id
-        ].copy()
-
-
-        # ====================================================
-        # STUDENT FOUND
-        # ====================================================
-
-        if (
-            not student_data.empty
-            or not result_data.empty
-        ):
-
-            student_name = (
-                "NOT AVAILABLE"
-            )
-
-            counsellor_name = (
-                "NOT AVAILABLE"
-            )
-
-            regulation = (
-                "NOT AVAILABLE"
-            )
-
-            emp_id = (
-                "NOT AVAILABLE"
-            )
-
-            cgpa_value = (
-                "NOT AVAILABLE"
-            )
-
-
-            # =================================================
-            # MENTOR DATA
-            # =================================================
-
-            if not mentor_data.empty:
-
-                if (
-                    "Student Name"
-                    in mentor_data.columns
-                ):
-
-                    value = (
-                        mentor_data.iloc[0][
-                            "Student Name"
-                        ]
-                    )
-
-                    if pd.notna(value):
-
-                        student_name = (
-                            str(value)
-                            .strip()
-                            .upper()
-                        )
-
-
-                if (
-                    "Counsellor"
-                    in mentor_data.columns
-                ):
-
-                    value = (
-                        mentor_data.iloc[0][
-                            "Counsellor"
-                        ]
-                    )
-
-                    if pd.notna(value):
-
-                        counsellor_name = (
-                            str(value)
-                            .strip()
-                            .upper()
-                        )
-
-
-                if (
-                    "Regulation"
-                    in mentor_data.columns
-                ):
-
-                    value = (
-                        mentor_data.iloc[0][
-                            "Regulation"
-                        ]
-                    )
-
-                    if pd.notna(value):
-
-                        regulation = (
-                            str(value)
-                            .strip()
-                            .upper()
-                        )
-
-
-                if (
-                    "EMP ID"
-                    in mentor_data.columns
-                ):
-
-                    value = (
-                        mentor_data.iloc[0][
-                            "EMP ID"
-                        ]
-                    )
-
-                    if pd.notna(value):
-
-                        emp_id = str(value).strip()
-
-
-            # =================================================
-            # GET REGULATION FROM RESULT FILE
-            # =================================================
+            # ====================================================
+            # STUDENT FOUND
+            # ====================================================
 
             if (
-                regulation == "NOT AVAILABLE"
-                and not result_data.empty
+                not student_data.empty
+                or not result_data.empty
             ):
 
+                student_name = (
+                    "NOT AVAILABLE"
+                )
+
+                counsellor_name = (
+                    "NOT AVAILABLE"
+                )
+
                 regulation = (
-                    str(
-                        result_data.iloc[0][
-                            "Regulation"
-                        ]
+                    "NOT AVAILABLE"
+                )
+
+                emp_id = (
+                    "NOT AVAILABLE"
+                )
+
+                cgpa_value = (
+                    "NOT AVAILABLE"
+                )
+
+
+                # =================================================
+                # MENTOR DATA
+                # =================================================
+
+                if not mentor_data.empty:
+
+                    if (
+                        "Student Name"
+                        in mentor_data.columns
+                    ):
+
+                        value = (
+                            mentor_data.iloc[0][
+                                "Student Name"
+                            ]
+                        )
+
+                        if pd.notna(value):
+
+                            student_name = (
+                                str(value)
+                                .strip()
+                                .upper()
+                            )
+
+
+                    if (
+                        "Counsellor"
+                        in mentor_data.columns
+                    ):
+
+                        value = (
+                            mentor_data.iloc[0][
+                                "Counsellor"
+                            ]
+                        )
+
+                        if pd.notna(value):
+
+                            counsellor_name = (
+                                str(value)
+                                .strip()
+                                .upper()
+                            )
+
+
+                    if (
+                        "Regulation"
+                        in mentor_data.columns
+                    ):
+
+                        value = (
+                            mentor_data.iloc[0][
+                                "Regulation"
+                            ]
+                        )
+
+                        if pd.notna(value):
+
+                            regulation = (
+                                str(value)
+                                .strip()
+                                .upper()
+                            )
+
+
+                    if (
+                        "EMP ID"
+                        in mentor_data.columns
+                    ):
+
+                        value = (
+                            mentor_data.iloc[0][
+                                "EMP ID"
+                            ]
+                        )
+
+                        if pd.notna(value):
+
+                            emp_id = str(value).strip()
+
+
+                # =================================================
+                # GET REGULATION FROM RESULT FILE
+                # =================================================
+
+                if (
+                    regulation == "NOT AVAILABLE"
+                    and not result_data.empty
+                ):
+
+                    regulation = (
+                        str(
+                            result_data.iloc[0][
+                                "Regulation"
+                            ]
+                        )
+                        .strip()
+                        .upper()
                     )
-                    .strip()
-                    .upper()
-                )
 
 
-            # =================================================
-            # GET CGPA
-            # =================================================
+                # =================================================
+                # GET CGPA
+                # =================================================
 
-            if not cgpa_data.empty:
+                if not cgpa_data.empty:
 
-                raw_cgpa = (
-                    cgpa_data.iloc[0]["CGPA"]
-                )
+                    raw_cgpa = (
+                        cgpa_data.iloc[0]["CGPA"]
+                    )
 
-                if pd.notna(raw_cgpa):
+                    if pd.notna(raw_cgpa):
 
-                    try:
+                        try:
 
-                        cgpa_value = (
-                            f"{float(raw_cgpa):.2f}"
-                        )
+                            cgpa_value = (
+                                f"{float(raw_cgpa):.2f}"
+                            )
 
-                    except Exception:
+                        except Exception:
 
-                        cgpa_value = (
-                            str(raw_cgpa).strip()
-                        )
+                            cgpa_value = (
+                                str(raw_cgpa).strip()
+                            )
 
 
-            # =================================================
-            # STUDENT DETAILS
-            # =================================================
+                # =================================================
+                # STUDENT DETAILS
+                # =================================================
 
-            st.html(f"""
+                st.html(f"""
 
-            <div class="student-details-container">
+                <div class="student-details-container">
 
-                <div class="details-heading">
-                    👤 STUDENT DETAILS
+                    <div class="details-heading">
+                        👤 STUDENT DETAILS
+                    </div>
+
+                    <div style="
+                        display:grid;
+                        grid-template-columns:
+                            1.05fr 1.8fr 2fr 1fr 0.9fr 0.8fr;
+                        gap:22px;
+                        align-items:start;
+                    ">
+
+
+                        <div>
+
+                            <div class="detail-label">
+                                STUDENT ID
+                            </div>
+
+                            <div class="detail-value
+                                        detail-value-id">
+
+                                {html.escape(student_id)}
+
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <div class="detail-label">
+                                STUDENT NAME
+                            </div>
+
+                            <div class="detail-value">
+
+                                {html.escape(student_name)}
+
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <div class="detail-label">
+                                COUNSELLOR
+                            </div>
+
+                            <div class="detail-value">
+
+                                {html.escape(counsellor_name)}
+
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <div class="detail-label">
+                                EMP ID
+                            </div>
+
+                            <div class="detail-value">
+
+                                {html.escape(emp_id)}
+
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <div class="detail-label">
+                                REGULATION
+                            </div>
+
+                            <div class="detail-value">
+
+                                {html.escape(regulation)}
+
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            <div class="detail-label">
+                                CGPA
+                            </div>
+
+                            <div class="detail-value cgpa-value">
+
+                                {html.escape(cgpa_value)}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </div>
 
-                <div style="
-                    display:grid;
-                    grid-template-columns:
-                        1.05fr 1.8fr 2fr 1fr 0.9fr 0.8fr;
-                    gap:22px;
-                    align-items:start;
-                ">
-
-
-                    <div>
-
-                        <div class="detail-label">
-                            STUDENT ID
-                        </div>
-
-                        <div class="detail-value
-                                    detail-value-id">
-
-                            {html.escape(student_id)}
-
-                        </div>
-
-                    </div>
-
-
-                    <div>
-
-                        <div class="detail-label">
-                            STUDENT NAME
-                        </div>
-
-                        <div class="detail-value">
-
-                            {html.escape(student_name)}
-
-                        </div>
-
-                    </div>
-
-
-                    <div>
-
-                        <div class="detail-label">
-                            COUNSELLOR
-                        </div>
-
-                        <div class="detail-value">
-
-                            {html.escape(counsellor_name)}
-
-                        </div>
-
-                    </div>
-
-
-                    <div>
-
-                        <div class="detail-label">
-                            EMP ID
-                        </div>
-
-                        <div class="detail-value">
-
-                            {html.escape(emp_id)}
-
-                        </div>
-
-                    </div>
-
-
-                    <div>
-
-                        <div class="detail-label">
-                            REGULATION
-                        </div>
-
-                        <div class="detail-value">
-
-                            {html.escape(regulation)}
-
-                        </div>
-
-                    </div>
-
-
-                    <div>
-
-                        <div class="detail-label">
-                            CGPA
-                        </div>
-
-                        <div class="detail-value cgpa-value">
-
-                            {html.escape(cgpa_value)}
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            """)
-
-
-            # =================================================
-            # IN-SEMESTER PERFORMANCE
-            # =================================================
-
-            if not student_data.empty:
-
-                st.html("""
-                <div class="section-heading">
-                    📊 IN-SEMESTER PERFORMANCE
-                </div>
                 """)
 
-                required_columns = [
-                    "Course Code",
-                    "Course Name",
-                    "Total"
-                ]
 
-                missing_columns = [
-                    column
-                    for column in required_columns
-                    if column not in student_data.columns
-                ]
+                # =================================================
+                # IN-SEMESTER PERFORMANCE
+                # =================================================
 
-                if missing_columns:
+                if not student_data.empty:
 
-                    st.error(
-                        "Missing In-Semester columns: "
-                        + ", ".join(
-                            missing_columns
-                        )
-                    )
-
-                else:
-
-                    display_data = student_data[
-                        required_columns
-                    ].copy()
-
-                    display_data.insert(
-                        0,
-                        "S.No",
-                        range(
-                            1,
-                            len(display_data) + 1
-                        )
-                    )
-
-                    table_rows = ""
-
-                    for _, row in display_data.iterrows():
-
-                        course_code = html.escape(
-                            str(
-                                row[
-                                    "Course Code"
-                                ]
-                            )
-                        )
-
-                        course_name = html.escape(
-                            str(
-                                row[
-                                    "Course Name"
-                                ]
-                            )
-                        )
-
-                        if pd.isna(
-                            row["Total"]
-                        ):
-
-                            marks_text = "—"
-
-                        else:
-
-                            marks = float(
-                                row["Total"]
-                            )
-
-                            if marks.is_integer():
-
-                                marks_text = (
-                                    f"{int(marks)} / 50"
-                                )
-
-                            else:
-
-                                marks_text = (
-                                    f"{marks:g} / 50"
-                                )
-
-                        table_rows += f"""
-
-                        <tr>
-
-                            <td class="serial-number">
-                                {int(row["S.No"])}
-                            </td>
-
-                            <td class="course-code">
-                                {course_code}
-                            </td>
-
-                            <td class="course-title">
-                                {course_name}
-                            </td>
-
-                            <td class="marks">
-                                {marks_text}
-                            </td>
-
-                        </tr>
-
-                        """
-
-
-                    # =================================================
-                    # IN-SEM TABLE
-                    # =================================================
-
-                    st.html(f"""
-
-                    <div class="table-wrapper">
-
-                        <table class="performance-table">
-
-                            <thead>
-
-                                <tr>
-
-                                    <th style="width:8%;">
-                                        S.No
-                                    </th>
-
-                                    <th style="width:18%;">
-                                        Course Code
-                                    </th>
-
-                                    <th>
-                                        Course Title
-                                    </th>
-
-                                    <th style="width:18%;">
-                                        In-Sem Marks / 50
-                                    </th>
-
-                                </tr>
-
-                            </thead>
-
-                            <tbody>
-
-                                {table_rows}
-
-                            </tbody>
-
-                        </table>
-
+                    st.html("""
+                    <div class="section-heading">
+                        📊 IN-SEMESTER PERFORMANCE
                     </div>
-
                     """)
 
-
-                    # =================================================
-                    # IN-SEM SUMMARY
-                    # =================================================
-
-                    valid_marks = (
-                        display_data[
-                            "Total"
-                        ]
-                        .dropna()
-                    )
-
-                    if not valid_marks.empty:
-
-                        total_marks = (
-                            valid_marks.sum()
-                        )
-
-                        maximum_marks = (
-                            len(valid_marks)
-                            * 50
-                        )
-
-                        average_marks = (
-                            valid_marks.mean()
-                        )
-
-                        summary_col1, summary_col2, summary_col3 = (
-                            st.columns(3)
-                        )
-
-                        with summary_col1:
-
-                            st.html(f"""
-
-                            <div class="summary-card">
-
-                                <div class="summary-label">
-                                    TOTAL COURSES
-                                </div>
-
-                                <div class="summary-value">
-                                    {len(valid_marks)}
-                                </div>
-
-                            </div>
-
-                            """)
-
-                        with summary_col2:
-
-                            st.html(f"""
-
-                            <div class="summary-card">
-
-                                <div class="summary-label">
-                                    TOTAL MARKS
-                                </div>
-
-                                <div class="summary-value">
-                                    {total_marks:g}
-                                    /
-                                    {maximum_marks}
-                                </div>
-
-                            </div>
-
-                            """)
-
-                        with summary_col3:
-
-                            st.html(f"""
-
-                            <div class="summary-card">
-
-                                <div class="summary-label">
-                                    AVERAGE MARKS
-                                </div>
-
-                                <div class="summary-value">
-                                    {average_marks:.2f}
-                                    / 50
-                                </div>
-
-                            </div>
-
-                            """)
-
-
-            # =================================================
-            # COMPLETE ACADEMIC PERFORMANCE
-            # =================================================
-
-            st.html("""
-            <div class="section-heading"
-                 style="margin-top:32px;">
-
-                🎓 COMPLETE ACADEMIC PERFORMANCE
-
-            </div>
-            """)
-
-
-            # =================================================
-            # ACADEMIC PERFORMANCE HIGHLIGHTS
-            # =================================================
-
-            if not result_data.empty:
-
-                result_data[
-                    "Category Clean"
-                ] = (
-                    result_data[
-                        "Category"
+                    required_columns = [
+                        "Course Code",
+                        "Course Name",
+                        "Total"
                     ]
-                    .fillna("-")
-                    .astype(str)
-                    .str.strip()
-                    .str.upper()
-                )
 
-                result_data.loc[
-                    result_data[
-                        "Category Clean"
-                    ].isin(
-                        [
-                            "",
-                            "NAN",
-                            "NONE"
-                        ]
-                    ),
-                    "Category Clean"
-                ] = "-"
-
-
-                total_courses = len(
-                    result_data
-                )
-
-
-                category_counts = (
-                    result_data[
-                        "Category Clean"
+                    missing_columns = [
+                        column
+                        for column in required_columns
+                        if column not in student_data.columns
                     ]
-                    .value_counts()
-                    .to_dict()
-                )
 
+                    if missing_columns:
 
-                # ONLY P IS PASSED
-
-                passed_courses = (
-                    category_counts.get(
-                        "P",
-                        0
-                    )
-                )
-
-
-                # EVERYTHING EXCEPT P
-
-                backlog_courses = (
-                    total_courses
-                    - passed_courses
-                )
-
-
-                all_categories = list(
-                    category_counts.keys()
-                )
-
-
-                ordered_categories = []
-
-
-                if "P" in all_categories:
-
-                    ordered_categories.append(
-                        "P"
-                    )
-
-
-                remaining_categories = sorted(
-                    [
-                        category
-                        for category
-                        in all_categories
-                        if category != "P"
-                    ]
-                )
-
-
-                ordered_categories.extend(
-                    remaining_categories
-                )
-
-
-                # =================================================
-                # HIGHLIGHTS TITLE
-                # =================================================
-
-                st.html("""
-                <div class="academic-highlights">
-
-                    <div class="highlights-title">
-                        📌 ACADEMIC PERFORMANCE HIGHLIGHTS
-                    </div>
-
-                </div>
-                """)
-
-
-                # =================================================
-                # HORIZONTAL TABLE
-                # =================================================
-
-                header_html = """
-
-                <th>
-                    TOTAL COURSES
-                </th>
-
-                <th>
-                    PASSED
-                </th>
-
-                <th>
-                    BACKLOGS
-                </th>
-
-                """
-
-
-                value_html = f"""
-
-                <td class="normal-value">
-                    {total_courses}
-                </td>
-
-                <td class="pass-value">
-                    {passed_courses}
-                </td>
-
-                <td class="backlog-value">
-                    {backlog_courses}
-                </td>
-
-                """
-
-
-                # ALL CATEGORIES FROM EXCEL
-
-                for category in ordered_categories:
-
-                    count = (
-                        category_counts
-                        .get(
-                            category,
-                            0
-                        )
-                    )
-
-                    safe_category = html.escape(
-                        str(category)
-                    )
-
-                    header_html += f"""
-
-                    <th>
-                        {safe_category}
-                    </th>
-
-                    """
-
-                    if category == "P":
-
-                        value_class = (
-                            "pass-value"
+                        st.error(
+                            "Missing In-Semester columns: "
+                            + ", ".join(
+                                missing_columns
+                            )
                         )
 
                     else:
 
-                        value_class = (
-                            "backlog-value"
+                        display_data = student_data[
+                            required_columns
+                        ].copy()
+
+                        display_data.insert(
+                            0,
+                            "S.No",
+                            range(
+                                1,
+                                len(display_data) + 1
+                            )
                         )
 
-                    value_html += f"""
+                        table_rows = ""
 
-                    <td class="{value_class}">
-                        {count}
+                        for _, row in display_data.iterrows():
+
+                            course_code = html.escape(
+                                str(
+                                    row[
+                                        "Course Code"
+                                    ]
+                                )
+                            )
+
+                            course_name = html.escape(
+                                str(
+                                    row[
+                                        "Course Name"
+                                    ]
+                                )
+                            )
+
+                            if pd.isna(
+                                row["Total"]
+                            ):
+
+                                marks_text = "—"
+
+                            else:
+
+                                marks = float(
+                                    row["Total"]
+                                )
+
+                                if marks.is_integer():
+
+                                    marks_text = (
+                                        f"{int(marks)} / 50"
+                                    )
+
+                                else:
+
+                                    marks_text = (
+                                        f"{marks:g} / 50"
+                                    )
+
+                            table_rows += f"""
+
+                            <tr>
+
+                                <td class="serial-number">
+                                    {int(row["S.No"])}
+                                </td>
+
+                                <td class="course-code">
+                                    {course_code}
+                                </td>
+
+                                <td class="course-title">
+                                    {course_name}
+                                </td>
+
+                                <td class="marks">
+                                    {marks_text}
+                                </td>
+
+                            </tr>
+
+                            """
+
+
+                        # =================================================
+                        # IN-SEM TABLE
+                        # =================================================
+
+                        st.html(f"""
+
+                        <div class="table-wrapper">
+
+                            <table class="performance-table">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th style="width:8%;">
+                                            S.No
+                                        </th>
+
+                                        <th style="width:18%;">
+                                            Course Code
+                                        </th>
+
+                                        <th>
+                                            Course Title
+                                        </th>
+
+                                        <th style="width:18%;">
+                                            In-Sem Marks / 50
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    {table_rows}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                        """)
+
+
+                        # =================================================
+                        # IN-SEM SUMMARY
+                        # =================================================
+
+                        valid_marks = (
+                            display_data[
+                                "Total"
+                            ]
+                            .dropna()
+                        )
+
+                        if not valid_marks.empty:
+
+                            total_marks = (
+                                valid_marks.sum()
+                            )
+
+                            maximum_marks = (
+                                len(valid_marks)
+                                * 50
+                            )
+
+                            average_marks = (
+                                valid_marks.mean()
+                            )
+
+                            summary_col1, summary_col2, summary_col3 = (
+                                st.columns(3)
+                            )
+
+                            with summary_col1:
+
+                                st.html(f"""
+
+                                <div class="summary-card">
+
+                                    <div class="summary-label">
+                                        TOTAL COURSES
+                                    </div>
+
+                                    <div class="summary-value">
+                                        {len(valid_marks)}
+                                    </div>
+
+                                </div>
+
+                                """)
+
+                            with summary_col2:
+
+                                st.html(f"""
+
+                                <div class="summary-card">
+
+                                    <div class="summary-label">
+                                        TOTAL MARKS
+                                    </div>
+
+                                    <div class="summary-value">
+                                        {total_marks:g}
+                                        /
+                                        {maximum_marks}
+                                    </div>
+
+                                </div>
+
+                                """)
+
+                            with summary_col3:
+
+                                st.html(f"""
+
+                                <div class="summary-card">
+
+                                    <div class="summary-label">
+                                        AVERAGE MARKS
+                                    </div>
+
+                                    <div class="summary-value">
+                                        {average_marks:.2f}
+                                        / 50
+                                    </div>
+
+                                </div>
+
+                                """)
+
+
+                # =================================================
+                # COMPLETE ACADEMIC PERFORMANCE
+                # =================================================
+
+                st.html("""
+                <div class="section-heading"
+                     style="margin-top:32px;">
+
+                    🎓 COMPLETE ACADEMIC PERFORMANCE
+
+                </div>
+                """)
+
+
+                # =================================================
+                # ACADEMIC PERFORMANCE HIGHLIGHTS
+                # =================================================
+
+                if not result_data.empty:
+
+                    result_data[
+                        "Category Clean"
+                    ] = (
+                        result_data[
+                            "Category"
+                        ]
+                        .fillna("-")
+                        .astype(str)
+                        .str.strip()
+                        .str.upper()
+                    )
+
+                    result_data.loc[
+                        result_data[
+                            "Category Clean"
+                        ].isin(
+                            [
+                                "",
+                                "NAN",
+                                "NONE"
+                            ]
+                        ),
+                        "Category Clean"
+                    ] = "-"
+
+
+                    total_courses = len(
+                        result_data
+                    )
+
+
+                    category_counts = (
+                        result_data[
+                            "Category Clean"
+                        ]
+                        .value_counts()
+                        .to_dict()
+                    )
+
+
+                    # ONLY P IS PASSED
+
+                    passed_courses = (
+                        category_counts.get(
+                            "P",
+                            0
+                        )
+                    )
+
+
+                    # EVERYTHING EXCEPT P
+
+                    backlog_courses = (
+                        total_courses
+                        - passed_courses
+                    )
+
+
+                    all_categories = list(
+                        category_counts.keys()
+                    )
+
+
+                    ordered_categories = []
+
+
+                    if "P" in all_categories:
+
+                        ordered_categories.append(
+                            "P"
+                        )
+
+
+                    remaining_categories = sorted(
+                        [
+                            category
+                            for category
+                            in all_categories
+                            if category != "P"
+                        ]
+                    )
+
+
+                    ordered_categories.extend(
+                        remaining_categories
+                    )
+
+
+                    # =================================================
+                    # HIGHLIGHTS TITLE
+                    # =================================================
+
+                    st.html("""
+                    <div class="academic-highlights">
+
+                        <div class="highlights-title">
+                            📌 ACADEMIC PERFORMANCE HIGHLIGHTS
+                        </div>
+
+                    </div>
+                    """)
+
+
+                    # =================================================
+                    # HORIZONTAL TABLE
+                    # =================================================
+
+                    header_html = """
+
+                    <th>
+                        TOTAL COURSES
+                    </th>
+
+                    <th>
+                        PASSED
+                    </th>
+
+                    <th>
+                        BACKLOGS
+                    </th>
+
+                    """
+
+
+                    value_html = f"""
+
+                    <td class="normal-value">
+                        {total_courses}
+                    </td>
+
+                    <td class="pass-value">
+                        {passed_courses}
+                    </td>
+
+                    <td class="backlog-value">
+                        {backlog_courses}
                     </td>
 
                     """
 
 
-                st.html(f"""
-
-                <div class="highlight-table-wrapper">
-
-                    <table class="highlight-table">
-
-                        <thead>
-
-                            <tr>
-
-                                {header_html}
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            <tr>
-
-                                {value_html}
-
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-                """)
-
-
-                # =================================================
-                # ADD SEMESTER NUMBER
-                # =================================================
-
-                result_data[
-                    "Semester Number"
-                ] = result_data.apply(
-                    lambda row:
-                    get_semester_number(
-                        regulation,
-                        row["AY"],
-                        row["Semester"]
-                    ),
-                    axis=1
-                )
-
-
-                # =================================================
-                # KEEP ONLY MAPPED SEMESTERS
-                # =================================================
-
-                result_data = result_data[
-                    result_data[
-                        "Semester Number"
-                    ].notna()
-                ].copy()
-
-
-                # =================================================
-                # SEMESTER ORDER
-                # =================================================
-
-                semester_order = [
-
-                    "1-1",
-                    "1-2",
-
-                    "2-1",
-                    "2-2",
-
-                    "3-1",
-                    "3-2",
-
-                    "4-1",
-                    "4-2"
-                ]
-
-
-                result_data[
-                    "Semester Sort"
-                ] = (
-                    result_data[
-                        "Semester Number"
-                    ]
-                    .apply(
-                        lambda x:
-                        semester_order.index(x)
-                        if x in semester_order
-                        else 999
-                    )
-                )
-
-
-                result_data = (
-                    result_data
-                    .sort_values(
-                        by=[
-                            "Semester Sort",
-                            "AY",
-                            "Semester"
-                        ]
-                    )
-                )
-
-
-                # =================================================
-                # DISPLAY EACH SEMESTER
-                # =================================================
-
-                for semester_number in semester_order:
-
-                    semester_data = result_data[
-                        result_data[
-                            "Semester Number"
-                        ]
-                        == semester_number
-                    ].copy()
-
-
-                    if semester_data.empty:
-                        continue
-
-
-                    ay_value = (
-                        semester_data.iloc[0][
-                            "AY"
-                        ]
-                    )
-
-
-                    term_value = (
-                        semester_data.iloc[0][
-                            "Semester"
-                        ]
-                    )
-
-
-                    # =================================================
-                    # SEMESTER HEADER
-                    # =================================================
-
-                    st.html(f"""
-
-                    <div class="semester-header">
-
-                        <div class="semester-title">
-
-                            📘 SEMESTER
-                            {semester_number}
-
-                        </div>
-
-                        <div class="semester-subtitle">
-
-                            Academic Year:
-                            {html.escape(
-                                str(ay_value)
-                            )}
-
-                            &nbsp;&nbsp;|&nbsp;&nbsp;
-
-                            {html.escape(
-                                str(term_value)
-                            )}
-
-                        </div>
-
-                    </div>
-
-                    """)
-
-
-                    # =================================================
-                    # SEMESTER TABLE
-                    # =================================================
-
-                    semester_display = semester_data[
-                        [
-                            "Course Code",
-                            "Course Name",
-                            "Grade",
-                            "Category"
-                        ]
-                    ].copy()
-
-
-                    semester_display.insert(
-                        0,
-                        "S.No",
-                        range(
-                            1,
-                            len(
-                                semester_display
-                            ) + 1
-                        )
-                    )
-
-
-                    semester_rows = ""
-
-
-                    for _, row in semester_display.iterrows():
-
-                        course_code = html.escape(
-                            str(
-                                row[
-                                    "Course Code"
-                                ]
+                    # ALL CATEGORIES FROM EXCEL
+
+                    for category in ordered_categories:
+
+                        count = (
+                            category_counts
+                            .get(
+                                category,
+                                0
                             )
                         )
 
-
-                        course_name = html.escape(
-                            str(
-                                row[
-                                    "Course Name"
-                                ]
-                            )
+                        safe_category = html.escape(
+                            str(category)
                         )
 
+                        header_html += f"""
 
-                        grade = html.escape(
-                            str(
-                                row[
-                                    "Grade"
-                                ]
+                        <th>
+                            {safe_category}
+                        </th>
+
+                        """
+
+                        if category == "P":
+
+                            value_class = (
+                                "pass-value"
                             )
-                        )
 
+                        else:
 
-                        category = html.escape(
-                            str(
-                                row[
-                                    "Category"
-                                ]
+                            value_class = (
+                                "backlog-value"
                             )
-                        )
 
+                        value_html += f"""
 
-                        semester_rows += f"""
-
-                        <tr>
-
-                            <td class="serial-number">
-                                {int(row["S.No"])}
-                            </td>
-
-                            <td class="course-code">
-                                {course_code}
-                            </td>
-
-                            <td class="course-title">
-                                {course_name}
-                            </td>
-
-                            <td class="grade-value">
-                                {grade}
-                            </td>
-
-                            <td class="category-value">
-                                {category}
-                            </td>
-
-                        </tr>
+                        <td class="{value_class}">
+                            {count}
+                        </td>
 
                         """
 
 
-                    # =================================================
-                    # DISPLAY SEMESTER TABLE
-                    # =================================================
-
                     st.html(f"""
 
-                    <div class="table-wrapper">
+                    <div class="highlight-table-wrapper">
 
-                        <table class="performance-table">
+                        <table class="highlight-table">
 
                             <thead>
 
                                 <tr>
 
-                                    <th style="width:8%;">
-                                        S.No
-                                    </th>
-
-                                    <th style="width:17%;">
-                                        Course Code
-                                    </th>
-
-                                    <th>
-                                        Course Name
-                                    </th>
-
-                                    <th style="width:12%;">
-                                        Grade
-                                    </th>
-
-                                    <th style="width:18%;">
-                                        Category
-                                    </th>
+                                    {header_html}
 
                                 </tr>
 
@@ -7053,7 +6799,11 @@ if search_clicked:
 
                             <tbody>
 
-                                {semester_rows}
+                                <tr>
+
+                                    {value_html}
+
+                                </tr>
 
                             </tbody>
 
@@ -7064,130 +6814,419 @@ if search_clicked:
                     """)
 
 
+                    # =================================================
+                    # ADD SEMESTER NUMBER
+                    # =================================================
+
+                    result_data[
+                        "Semester Number"
+                    ] = result_data.apply(
+                        lambda row:
+                        get_semester_number(
+                            regulation,
+                            row["AY"],
+                            row["Semester"]
+                        ),
+                        axis=1
+                    )
+
+
+                    # =================================================
+                    # KEEP ONLY MAPPED SEMESTERS
+                    # =================================================
+
+                    result_data = result_data[
+                        result_data[
+                            "Semester Number"
+                        ].notna()
+                    ].copy()
+
+
+                    # =================================================
+                    # SEMESTER ORDER
+                    # =================================================
+
+                    semester_order = [
+
+                        "1-1",
+                        "1-2",
+
+                        "2-1",
+                        "2-2",
+
+                        "3-1",
+                        "3-2",
+
+                        "4-1",
+                        "4-2"
+                    ]
+
+
+                    result_data[
+                        "Semester Sort"
+                    ] = (
+                        result_data[
+                            "Semester Number"
+                        ]
+                        .apply(
+                            lambda x:
+                            semester_order.index(x)
+                            if x in semester_order
+                            else 999
+                        )
+                    )
+
+
+                    result_data = (
+                        result_data
+                        .sort_values(
+                            by=[
+                                "Semester Sort",
+                                "AY",
+                                "Semester"
+                            ]
+                        )
+                    )
+
+
+                    # =================================================
+                    # DISPLAY EACH SEMESTER
+                    # =================================================
+
+                    for semester_number in semester_order:
+
+                        semester_data = result_data[
+                            result_data[
+                                "Semester Number"
+                            ]
+                            == semester_number
+                        ].copy()
+
+
+                        if semester_data.empty:
+                            continue
+
+
+                        ay_value = (
+                            semester_data.iloc[0][
+                                "AY"
+                            ]
+                        )
+
+
+                        term_value = (
+                            semester_data.iloc[0][
+                                "Semester"
+                            ]
+                        )
+
+
+                        # =================================================
+                        # SEMESTER HEADER
+                        # =================================================
+
+                        st.html(f"""
+
+                        <div class="semester-header">
+
+                            <div class="semester-title">
+
+                                📘 SEMESTER
+                                {semester_number}
+
+                            </div>
+
+                            <div class="semester-subtitle">
+
+                                Academic Year:
+                                {html.escape(
+                                    str(ay_value)
+                                )}
+
+                                &nbsp;&nbsp;|&nbsp;&nbsp;
+
+                                {html.escape(
+                                    str(term_value)
+                                )}
+
+                            </div>
+
+                        </div>
+
+                        """)
+
+
+                        # =================================================
+                        # SEMESTER TABLE
+                        # =================================================
+
+                        semester_display = semester_data[
+                            [
+                                "Course Code",
+                                "Course Name",
+                                "Grade",
+                                "Category"
+                            ]
+                        ].copy()
+
+
+                        semester_display.insert(
+                            0,
+                            "S.No",
+                            range(
+                                1,
+                                len(
+                                    semester_display
+                                ) + 1
+                            )
+                        )
+
+
+                        semester_rows = ""
+
+
+                        for _, row in semester_display.iterrows():
+
+                            course_code = html.escape(
+                                str(
+                                    row[
+                                        "Course Code"
+                                    ]
+                                )
+                            )
+
+
+                            course_name = html.escape(
+                                str(
+                                    row[
+                                        "Course Name"
+                                    ]
+                                )
+                            )
+
+
+                            grade = html.escape(
+                                str(
+                                    row[
+                                        "Grade"
+                                    ]
+                                )
+                            )
+
+
+                            category = html.escape(
+                                str(
+                                    row[
+                                        "Category"
+                                    ]
+                                )
+                            )
+
+
+                            semester_rows += f"""
+
+                            <tr>
+
+                                <td class="serial-number">
+                                    {int(row["S.No"])}
+                                </td>
+
+                                <td class="course-code">
+                                    {course_code}
+                                </td>
+
+                                <td class="course-title">
+                                    {course_name}
+                                </td>
+
+                                <td class="grade-value">
+                                    {grade}
+                                </td>
+
+                                <td class="category-value">
+                                    {category}
+                                </td>
+
+                            </tr>
+
+                            """
+
+
+                        # =================================================
+                        # DISPLAY SEMESTER TABLE
+                        # =================================================
+
+                        st.html(f"""
+
+                        <div class="table-wrapper">
+
+                            <table class="performance-table">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th style="width:8%;">
+                                            S.No
+                                        </th>
+
+                                        <th style="width:17%;">
+                                            Course Code
+                                        </th>
+
+                                        <th>
+                                            Course Name
+                                        </th>
+
+                                        <th style="width:12%;">
+                                            Grade
+                                        </th>
+
+                                        <th style="width:18%;">
+                                            Category
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    {semester_rows}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                        """)
+
+
+                else:
+
+                    st.info(
+                        "No academic result records were found "
+                        "for this student."
+                    )
+
+                # ============================================================
+                # PARENT ACADEMIC REPORT
+                # ============================================================
+
+                st.html("""
+                <div class="parent-report-card">
+
+                    <div class="parent-report-title">
+                        📄 PARENT ACADEMIC REPORT
+                    </div>
+
+                    <div class="parent-report-subtitle">
+                        Download a printable PDF containing the student's
+                        complete academic details, in-semester performance,
+                        academic highlights, semester-wise results,
+                        CGPA and counselling information.
+                    </div>
+
+                    <div class="parent-report-note">
+                        The report is generated for the student currently
+                        displayed above.
+                    </div>
+
+                </div>
+                """)
+
+
+                # ============================================================
+                # GENERATE PARENT PDF
+                # ============================================================
+
+                try:
+
+                    parent_pdf = build_parent_report_pdf(
+
+                        student_id=student_id,
+
+                        student_name=student_name,
+
+                        counsellor_name=counsellor_name,
+
+                        emp_id=emp_id,
+
+                        regulation=regulation,
+
+                        cgpa_value=cgpa_value,
+
+                        student_data=student_data,
+
+                        result_data=result_data,
+
+                        total_courses=total_courses,
+
+                        passed_courses=passed_courses,
+
+                        backlog_courses=backlog_courses,
+
+                        category_counts=category_counts,
+
+                        ordered_categories=ordered_categories
+
+                    )
+
+
+                    # ========================================================
+                    # DOWNLOAD BUTTON
+                    # ========================================================
+
+                    st.download_button(
+
+                        label="🖨️ DOWNLOAD PARENT REPORT (PDF)",
+
+                        data=parent_pdf,
+
+                        file_name=(
+                            f"{student_id}_Parent_Academic_Report.pdf"
+                        ),
+
+                        mime="application/pdf",
+
+                        use_container_width=True,
+
+                        key=f"parent_pdf_{student_id}"
+
+                    )
+
+
+                except Exception as pdf_error:
+
+                    st.error(
+
+                        "Unable to generate the Parent Academic Report. "
+                        f"Details: {pdf_error}"
+
+                    )
+            # ====================================================
+            # STUDENT NOT FOUND
+            # ====================================================
+        
             else:
 
-                st.info(
-                    "No academic result records were found "
-                    "for this student."
-                )
-
-            # ============================================================
-            # PARENT ACADEMIC REPORT
-            # ============================================================
-
-            st.html("""
-            <div class="parent-report-card">
-
-                <div class="parent-report-title">
-                    📄 PARENT ACADEMIC REPORT
-                </div>
-
-                <div class="parent-report-subtitle">
-                    Download a printable PDF containing the student's
-                    complete academic details, in-semester performance,
-                    academic highlights, semester-wise results,
-                    CGPA and counselling information.
-                </div>
-
-                <div class="parent-report-note">
-                    The report is generated for the student currently
-                    displayed above.
-                </div>
-
-            </div>
-            """)
-
-
-            # ============================================================
-            # GENERATE PARENT PDF
-            # ============================================================
-
-            try:
-
-                parent_pdf = build_parent_report_pdf(
-
-                    student_id=student_id,
-
-                    student_name=student_name,
-
-                    counsellor_name=counsellor_name,
-
-                    emp_id=emp_id,
-
-                    regulation=regulation,
-
-                    cgpa_value=cgpa_value,
-
-                    student_data=student_data,
-
-                    result_data=result_data,
-
-                    total_courses=total_courses,
-
-                    passed_courses=passed_courses,
-
-                    backlog_courses=backlog_courses,
-
-                    category_counts=category_counts,
-
-                    ordered_categories=ordered_categories
-
-                )
-
-
-                # ========================================================
-                # DOWNLOAD BUTTON
-                # ========================================================
-
-                st.download_button(
-
-                    label="🖨️ DOWNLOAD PARENT REPORT (PDF)",
-
-                    data=parent_pdf,
-
-                    file_name=(
-                        f"{student_id}_Parent_Academic_Report.pdf"
-                    ),
-
-                    mime="application/pdf",
-
-                    use_container_width=True,
-
-                    key=f"parent_pdf_{student_id}"
-
-                )
-
-
-            except Exception as pdf_error:
-
                 st.error(
-
-                    "Unable to generate the Parent Academic Report. "
-                    f"Details: {pdf_error}"
-
+                    f"Student ID {student_id} was not found "
+                    "in the available academic records."
                 )
-        # ====================================================
-        # STUDENT NOT FOUND
-        # ====================================================
-        
-        else:
-
-            st.error(
-                f"Student ID {student_id} was not found "
-                "in the available academic records."
-            )
 
 
-# ============================================================
-# FOOTER
-# ============================================================
+    # ============================================================
+    # FOOTER
+    # ============================================================
 
-st.html("""
-<div class="footer">
+    st.html("""
+    <div class="footer">
 
-    STUDENT ACADEMIC PERFORMANCE PORTAL
-    •
-    DEPARTMENT OF CSE-4
+        STUDENT ACADEMIC PERFORMANCE PORTAL
+        •
+        DEPARTMENT OF CSE-4
 
-</div>
-""")
+    </div>
+    """)
