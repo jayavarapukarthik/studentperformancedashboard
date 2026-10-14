@@ -5744,8 +5744,9 @@ account_spacer, account_col = st.columns([9.4, 1.6], gap="small")
 with account_col:
     username_label = st.session_state.get("authenticated_username", "User")
     with st.popover(f"👤 {username_label}", use_container_width=True):
+        st.caption("SIGNED IN AS")
         st.markdown(
-            f"**Signed in as**  <br>`{html.escape(str(username_label))}`"
+            f"**{html.escape(str(username_label))}**"
         )
         if st.button("↪ Log out", key="compact_logout", use_container_width=True):
             st.session_state["authenticated"] = False
