@@ -5008,6 +5008,18 @@ def display_top_students_by_regulation(
 def render_y26_trimester1_attendance_page():
     """Render the dedicated Y-26 M.Tech CSE Trimester-1 attendance page."""
 
+    # Navigation: return to the M.Tech landing page or the program selector.
+    nav_back_col, nav_home_col, nav_spacer = st.columns([1.7, 2.1, 6.2], gap="small")
+    with nav_back_col:
+        if st.button("← Back to M.Tech", key="attendance_back_to_mtech", use_container_width=True):
+            st.session_state["portal_page"] = "dashboard"
+            st.rerun()
+    with nav_home_col:
+        if st.button("⌂ Academic Program Home", key="attendance_back_to_programs", use_container_width=True):
+            st.session_state["program_section"] = "select"
+            st.session_state["portal_page"] = "dashboard"
+            st.rerun()
+
     st.markdown(
         """
         <style>
@@ -5870,6 +5882,13 @@ elif st.session_state["program_section"] == "M.Tech":
         render_y26_trimester1_attendance_page()
         st.stop()
 
+    mtech_nav_col, _mtech_nav_spacer = st.columns([2.2, 7.8], gap="small")
+    with mtech_nav_col:
+        if st.button("← Back to Academic Program Home", key="mtech_back_to_programs", use_container_width=True):
+            st.session_state["program_section"] = "select"
+            st.session_state["portal_page"] = "dashboard"
+            st.rerun()
+
     st.markdown(
         """
         <div style="max-width:1120px;margin:30px auto 24px auto;padding:26px 30px;
@@ -5895,6 +5914,14 @@ elif st.session_state["program_section"] == "M.Tech":
 # B.Tech selected: show the complete existing B.Tech dashboard below.
 
 if st.session_state["program_section"] == "B.Tech":
+    # Persistent navigation back to the program selector from the B.Tech dashboard.
+    btech_nav_col, _btech_nav_spacer = st.columns([2.2, 7.8], gap="small")
+    with btech_nav_col:
+        if st.button("← Back to Academic Program Home", key="btech_back_to_programs", use_container_width=True):
+            st.session_state["program_section"] = "select"
+            st.session_state["portal_page"] = "dashboard"
+            st.rerun()
+
     # ============================================================
     # REGULATION-WISE PERFORMANCE DASHBOARD
     # ============================================================
