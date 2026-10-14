@@ -5270,6 +5270,205 @@ def render_y26_trimester1_attendance_page():
                     f"Details: {attendance_error}"
                 )
 
+    # ============================================================
+    # OVERALL ATTENDANCE STATISTICS — FILTERED VIEWS + CSV EXPORT
+    # ============================================================
+    st.markdown(
+        """
+        <div style="
+            margin-top:34px;
+            padding:22px 26px;
+            border-radius:20px;
+            border:1px solid #d7e4f2;
+            border-left:7px solid #123b68;
+            background:linear-gradient(120deg,#ffffff 0%,#eef6ff 100%);
+            box-shadow:0 10px 26px rgba(18,59,104,.08);
+        ">
+            <div style="font-size:27px;font-weight:900;color:#123b68;">
+                📊 Overall Attendance Statistics
+            </div>
+            <div style="font-size:16px;color:#5b6f89;margin-top:5px;">
+                Explore student-wise or course-wise attendance and export the filtered results.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    if not Y26_TRIMESTER1_ATTENDANCE_FILE.exists():
+        st.warning(
+            "Add 'Y-26-M.Tech-CSE-T-1.xlsx' beside app.py to view overall attendance statistics."
+        )
+    else:
+        try:
+            stats_source = pd.read_excel(
+                Y26_TRIMESTER1_ATTENDANCE_FILE,
+                dtype={"Stu ID": str}
+            )
+            stats_source.columns = [str(c).strip() for c in stats_source.columns]
+
+            if "Stu ID" not in stats_source.columns:
+                st.error("The attendance workbook must contain a 'Stu ID' column.")
+            else:
+                stats_source["Stu ID"] = (
+                    stats_source["Stu ID"].astype(str).str.strip()
+                    .str.replace(r"\\.0$", "", regex=True)
+                )
+                course_columns = [c for c in stats_source.columns if c != "Stu ID"]
+                long_stats = stats_source.melt(
+                    id_vars=["Stu ID"],
+                    value_vars=course_columns,
+                    var_name="Course",
+                    value_name="Attendance Percentage"
+                )
+                long_stats["Attendance Percentage"] = pd.to_numeric(
+                    long_stats["Attendance Percentage"], errors="coerce"
+                )
+                long_stats = long_stats.dropna(subset=["Attendance Percentage"]).copy()
+                long_stats["Course Code"] = long_stats["Course"].astype(str).str.split("-", n=1).str[0].str.strip()
+                long_stats["Course Title"] = long_stats["Course"].astype(str).apply(
+                    lambda value: value.split("-", 1)[1].strip() if "-" in value else value.strip()
+                )
+                long_stats = long_stats.rename(columns={"Stu ID": "Student ID"})
+
+                control_left, control_right = st.columns([1.1, 2.5], vertical_alignment="center")
+                with control_left:
+                    attendance_view = st.radio(
+                        "VIEW",
+                        ["Student Wise", "Course Wise"],
+                        horizontal=True,
+                        key="y26_attendance_stats_view"
+                    )
+                with control_right:
+                    attendance_range = st.radio(
+                        "ATTENDANCE RANGE",
+                        [
+                            "All",
+                            "Below 75%",
+                            "75% to <85%",
+                            "Below 85%",
+                            "85% and above"
+                        ],
+                        horizontal=True,
+                        key="y26_attendance_stats_range"
+                    )
+
+                if attendance_range == "Below 75%":
+                    filtered_long = long_stats[long_stats["Attendance Percentage"] < 75].copy()
+                elif attendance_range == "75% to <85%":
+                    filtered_long = long_stats[
+                        (long_stats["Attendance Percentage"] >= 75)
+                        & (long_stats["Attendance Percentage"] < 85)
+                    ].copy()
+                elif attendance_range == "Below 85%":
+                    filtered_long = long_stats[long_stats["Attendance Percentage"] < 85].copy()
+                elif attendance_range == "85% and above":
+                    filtered_long = long_stats[long_stats["Attendance Percentage"] >= 85].copy()
+                else:
+                    filtered_long = long_stats.copy()
+
+                st.markdown(
+                    """
+                    <style>
+                    div[role="radiogroup"] label {
+                        background:#f0f5fb;
+                        border:1px solid #d6e2ef;
+                        border-radius:12px;
+                        padding:8px 13px;
+                        margin-right:5px;
+                    }
+                    div[role="radiogroup"] label p {
+                        font-size:15px !important;
+                        font-weight:750 !important;
+                        color:#23415f !important;
+                    }
+                    </style>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                if attendance_view == "Student Wise":
+                    student_view_df = filtered_long[
+                        ["Student ID", "Course Code", "Course Title", "Attendance Percentage"]
+                    ].copy()
+                    student_view_df = student_view_df.sort_values(
+                        ["Student ID", "Course Code"]
+                    ).reset_index(drop=True)
+                    student_view_df.insert(0, "S.No", range(1, len(student_view_df) + 1))
+                    student_view_df["Attendance Percentage"] = student_view_df[
+                        "Attendance Percentage"
+                    ].map(lambda value: f"{value:g}%")
+                    st.markdown(
+                        f"**Student-wise records:** {len(student_view_df):,} "
+                        f"&nbsp; | &nbsp; **Attendance filter:** {html.escape(attendance_range)}",
+                        unsafe_allow_html=True
+                    )
+                    st.dataframe(
+                        student_view_df,
+                        use_container_width=True,
+                        hide_index=True,
+                        height=430
+                    )
+                    csv_df = student_view_df
+                    csv_name = f"Y26_Trimester1_Student_Wise_{attendance_range.replace(' ', '_').replace('<', 'under')}.csv"
+                else:
+                    if filtered_long.empty:
+                        course_view_df = pd.DataFrame(
+                            columns=[
+                                "S.No", "Course Code", "Course Title",
+                                "Students in Selected Range", "Average Attendance",
+                                "Student IDs"
+                            ]
+                        )
+                    else:
+                        course_view_df = (
+                            filtered_long.groupby(
+                                ["Course Code", "Course Title"], dropna=False
+                            )
+                            .agg(
+                                **{
+                                    "Students in Selected Range": ("Student ID", "nunique"),
+                                    "Average Attendance": ("Attendance Percentage", "mean"),
+                                    "Student IDs": (
+                                        "Student ID",
+                                        lambda values: ", ".join(sorted(set(values.astype(str))))
+                                    )
+                                }
+                            )
+                            .reset_index()
+                            .sort_values(["Course Code"])
+                            .reset_index(drop=True)
+                        )
+                        course_view_df.insert(0, "S.No", range(1, len(course_view_df) + 1))
+                        course_view_df["Average Attendance"] = course_view_df[
+                            "Average Attendance"
+                        ].map(lambda value: f"{value:.2f}%")
+                    st.markdown(
+                        f"**Course-wise summary:** {len(course_view_df):,} courses "
+                        f"&nbsp; | &nbsp; **Attendance filter:** {html.escape(attendance_range)}",
+                        unsafe_allow_html=True
+                    )
+                    st.dataframe(
+                        course_view_df,
+                        use_container_width=True,
+                        hide_index=True,
+                        height=430
+                    )
+                    csv_df = course_view_df
+                    csv_name = f"Y26_Trimester1_Course_Wise_{attendance_range.replace(' ', '_').replace('<', 'under')}.csv"
+
+                st.download_button(
+                    "⬇️ Download Filtered Data (CSV)",
+                    data=csv_df.to_csv(index=False).encode("utf-8-sig"),
+                    file_name=csv_name,
+                    mime="text/csv",
+                    key=f"y26_attendance_stats_download_{attendance_view}_{attendance_range}",
+                    use_container_width=False
+                )
+
+        except Exception as stats_error:
+            st.error(f"Unable to prepare attendance statistics: {stats_error}")
+
 
 # ============================================================
 # REGULATION-WISE PERFORMANCE DASHBOARD
