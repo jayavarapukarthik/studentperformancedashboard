@@ -5727,58 +5727,44 @@ except Exception as e:
     st.stop()
 
 
+# Compact account menu: click the signed-in username to reveal Logout.
+account_spacer, account_col = st.columns([9.4, 1.6], gap="small")
+with account_col:
+    username_label = st.session_state.get("authenticated_username", "User")
+    with st.popover(f"👤 {username_label}", use_container_width=True):
+        st.markdown(
+            f"**Signed in as**  <br>`{html.escape(str(username_label))}`"
+        )
+        if st.button("↪ Log out", key="compact_logout", use_container_width=True):
+            st.session_state["authenticated"] = False
+            st.session_state["authenticated_username"] = ""
+            st.session_state["program_section"] = "select"
+            st.session_state["portal_page"] = "dashboard"
+            st.rerun()
+
 st.markdown(
-    f"""
-    <div style="
-        text-align:right;
-        color:#64748b;
-        font-size:13px;
-        font-weight:700;
-        margin:4px 4px 10px 0;
-    ">
-        Signed in as:
-        <span style="color:#123b68;">
-            {html.escape(
-                st.session_state.get(
-                    "authenticated_username",
-                    ""
-                )
-            )}
-        </span>
-    </div>
+    """
+    <style>
+    /* Compact account control and reduce unused vertical space after the header. */
+    div[data-testid="stPopover"] > button {
+        min-height: 38px !important;
+        padding: 5px 12px !important;
+        border-radius: 12px !important;
+        border: 1px solid #c7dff5 !important;
+        background: linear-gradient(135deg, #ffffff, #edf7ff) !important;
+        color: #123b68 !important;
+        font-size: 14px !important;
+        font-weight: 750 !important;
+        box-shadow: 0 4px 12px rgba(18, 59, 104, .08) !important;
+    }
+    div[data-testid="stPopover"] > button:hover {
+        border-color: #1684c5 !important;
+        background: #e8f4ff !important;
+    }
+    </style>
     """,
     unsafe_allow_html=True
 )
-
-
-
-# ============================================================
-# LOGOUT
-# ============================================================
-
-logout_left, logout_right = st.columns(
-    [8.8, 1.2]
-)
-
-with logout_right:
-
-    if st.button(
-        "Logout",
-        use_container_width=True
-    ):
-
-        st.session_state[
-            "authenticated"
-        ] = False
-
-        st.session_state[
-            "authenticated_username"
-        ] = ""
-        st.session_state["program_section"] = "select"
-        st.session_state["portal_page"] = "dashboard"
-
-        st.rerun()
-
 
 
 # ============================================================
@@ -5797,8 +5783,8 @@ if st.session_state["program_section"] == "select":
         <style>
         .program-choice-wrap {
             max-width: 1120px;
-            margin: 34px auto 24px auto;
-            padding: 30px;
+            margin: 8px auto 14px auto;
+            padding: 20px 24px;
             border-radius: 26px;
             border: 1px solid #d4e5f7;
             background: linear-gradient(135deg, #ffffff 0%, #eef7ff 55%, #e4f2ff 100%);
@@ -5807,29 +5793,29 @@ if st.session_state["program_section"] == "select":
         }
         .program-choice-title {
             color: #123b68;
-            font-size: 30px;
+            font-size: 26px;
             font-weight: 900;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
         .program-choice-subtitle {
             color: #5d718a;
-            font-size: 17px;
-            margin-bottom: 24px;
+            font-size: 15px;
+            margin-bottom: 12px;
         }
         .program-card-note {
             color: #60758d;
             font-size: 14px;
             text-align: center;
-            margin-top: 6px;
+            margin-top: 4px;
         }
         div[data-testid="stButton"] button[kind="primary"] {
-            min-height: 78px !important;
-            border-radius: 17px !important;
+            min-height: 60px !important;
+            border-radius: 15px !important;
             border: 1px solid rgba(255,255,255,.55) !important;
             background: linear-gradient(115deg, #123b68, #087fc1) !important;
             color: #ffffff !important;
-            font-size: 23px !important;
-            font-weight: 900 !important;
+            font-size: 19px !important;
+            font-weight: 850 !important;
             box-shadow: 0 10px 24px rgba(18,59,104,.18) !important;
         }
         div[data-testid="stButton"] button[kind="primary"]:hover {
@@ -5837,13 +5823,13 @@ if st.session_state["program_section"] == "select":
             transform: translateY(-2px);
         }
         div[data-testid="stButton"] button[kind="secondary"] {
-            min-height: 78px !important;
-            border-radius: 17px !important;
+            min-height: 60px !important;
+            border-radius: 15px !important;
             border: 1px solid #b9d4ed !important;
             background: linear-gradient(115deg, #ffffff, #f0f8ff) !important;
             color: #123b68 !important;
-            font-size: 23px !important;
-            font-weight: 900 !important;
+            font-size: 19px !important;
+            font-weight: 850 !important;
             box-shadow: 0 10px 24px rgba(18,59,104,.10) !important;
         }
         div[data-testid="stButton"] button[kind="secondary"]:hover {
